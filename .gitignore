@@ -21,3 +21,6 @@ training/sandbox/
 
 # Training logs
 training/*.log
+
+# Research proposal (kept local, not published)
+*Research_Proposal*.docx

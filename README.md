@@ -4,28 +4,25 @@
 
 Point the camera at a tomato or a hand of green bananas and the app answers with one action:
 
-| | Action | Meaning for the seller |
-|---|---|---|
-| 🟢 | **Fresh** | Sell at the normal price |
-| 🟡 | **Sell Soon** | Early signs of change: put it at the front and sell it first |
-| 🟠 | **Discount Today** | Lower the price and sell it today |
-| 🔴 | **Spoilage Risk** | Remove from sale; keep it away from fresh produce |
-| ⚪ | **Uncertain** | Photo too dark or blurry, model unsure, or not a supported crop: retake the photo |
+| Action | Meaning for the seller |
+|---|---|
+| **Fresh** | Sell at the normal price |
+| **Sell Soon** | Early signs of change: put it at the front and sell it first |
+| **Discount Today** | Lower the price and sell it today |
+| **Spoilage Risk** | Remove from sale; keep it away from fresh produce |
+| **Uncertain** | Photo too dark or blurry, model unsure, or not a supported crop: retake the photo |
 
 Built for sellers in **Nyabihu and Rusizi, Rwanda**. BSc Software Engineering project by **Sage Muhodari**.
 
-> [!IMPORTANT]
-> **Only tomatoes and green bananas are supported.** The model was trained on these two crops only.
+> **Important: only tomatoes and green bananas are supported.** The model was trained on these two crops only.
 > Photos of anything else (oranges, potatoes, onions, …) are answered with **Uncertain**, never with a freshness result.
 
-> [!WARNING]
-> The app judges **visible condition only**. It is **not a food-safety check**.
+> **Warning:** the app judges **visible condition only**. It is **not a food-safety check**.
 
 ### Read more
 
-- 💻 **Source code:** [github.com/Muhodari/HarvestShelfAI](https://github.com/Muhodari/HarvestShelfAI)
-- 📓 **Project notebook:** [`training/notebooks/HarvestShelf_AI.ipynb`](training/notebooks/HarvestShelf_AI.ipynb). It is the main write-up, with results, graphs and how to reproduce them.
-- 📄 **Research proposal:** [`HarvestShelf_AI_Revised_Research_Proposal_Expanded_Evidence.docx`](HarvestShelf_AI_Revised_Research_Proposal_Expanded_Evidence.docx)
+- **Source code:** [github.com/Muhodari/HarvestShelfAI](https://github.com/Muhodari/HarvestShelfAI)
+- **Project notebook:** [`training/notebooks/HarvestShelf_AI.ipynb`](training/notebooks/HarvestShelf_AI.ipynb). It is the main write-up, with results, graphs and how to reproduce them.
 
 ---
 
@@ -70,7 +67,7 @@ Test results on held-out capture sessions:
 
 | Model | Macro-F1 | Spoilage recall | Phone size | Role |
 |---|:-:|:-:|:-:|---|
-| **EfficientNet-Lite0** | 0.822 | 0.957 | 3.7 MB | ✅ **in the app** |
+| **EfficientNet-Lite0** | 0.822 | 0.957 | 3.7 MB | **in the app** |
 | EfficientNetV2-B0 | 0.829 | 0.971 | 11.8 MB | just over the 10 MB limit |
 | ResNet50 | 0.840 | 0.957 | 24.0 MB | accuracy reference |
 | MobileNetV3-Small | 0.822 | 0.957 | 1.9 MB | baseline only |
@@ -161,8 +158,7 @@ Then open **http://127.0.0.1:8765**. The portal runs on your computer only.
 | **Photos** | See how many photos each label has against the 300-per-label target. Add a second person's label for the agreement check, filter, and delete photos. |
 | **Train** | Pick a model and the number of epochs, then start a run and follow the live log. Each run shows its test results. **Install in app** copies the model into `app/assets/model`; rebuild the app to use it. |
 
-> [!TIP]
-> Keep **Include public photos** ticked until you have photos from many separate batches. Training needs whole batches it can set aside for testing.
+> **Tip:** keep **Include public photos** ticked until you have photos from many separate batches. Training needs whole batches it can set aside for testing.
 > Upload *Other produce* photos too, labelled **Unusable**. They teach the model to answer Uncertain for crops it does not support.
 
 Portal runs are saved in `training/sandbox/portal/` (not committed).
@@ -191,8 +187,7 @@ photo (camera or gallery, ≤ 1280 px)
 
 English and **Kinyarwanda**. Switch on the Welcome screen or in Profile → Language; the choice is remembered on the phone. All text is in [`app/lib/l10n/app_text.dart`](app/lib/l10n/app_text.dart), with both languages side by side.
 
-> [!NOTE]
-> The Kinyarwanda text must be reviewed by a native speaker before the field study. Android's own system buttons stay in English, because Flutter has no built-in Kinyarwanda translations for them.
+> **Note:** the Kinyarwanda text must be reviewed by a native speaker before the field study. Android's own system buttons stay in English, because Flutter has no built-in Kinyarwanda translations for them.
 
 ### Accounts (offline)
 
@@ -210,7 +205,7 @@ Accounts are stored only on the phone (SQLite), so the app still needs no intern
 
 ## Targets and where they are measured
 
-| Target (from the proposal) | Where it is measured |
+| Project target | Where it is measured |
 |---|---|
 | Action macro-F1 ≥ 0.80, spoilage recall ≥ 0.85 | `src.evaluate --split test` → `test_metrics.json` |
 | Inference < 1 s on a 3–4 GB phone | `inference_ms` in the app's exported test log |
