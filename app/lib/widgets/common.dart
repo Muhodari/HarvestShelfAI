@@ -48,12 +48,14 @@ class CategoryBadge extends StatelessWidget {
         children: [
           Icon(categoryIcon(category), color: color, size: 15),
           const SizedBox(width: 5),
-          Text(
-            AppText.of(context).category(category),
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+          Flexible(
+            child: Text(
+              AppText.of(context).category(category),
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
             ),
           ),
         ],
@@ -95,9 +97,9 @@ class ConfidenceBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: value.clamp(0, 1),
-            minHeight: 6,
+            minHeight: 8,
             color: color,
-            backgroundColor: Brand.line,
+            backgroundColor: color.withValues(alpha: 0.15),
           ),
         ),
       ],
@@ -220,7 +222,7 @@ class ScanThumb extends StatelessWidget {
         child: file != null && file.existsSync()
             ? Image.file(file, fit: BoxFit.cover)
             : ColoredBox(
-                color: Brand.surface,
+                color: Brand.line,
                 child: Icon(
                   Icons.image_outlined,
                   color: Brand.inkSoft,
@@ -237,7 +239,7 @@ class ScanTile extends StatelessWidget {
   const ScanTile({
     super.key,
     required this.scan,
-    this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   });
 
   final Scan scan;
@@ -246,12 +248,11 @@ class ScanTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showPct = scan.reason == DecisionReason.model;
-    final color = categoryColor(scan.category);
     return Padding(
       padding: padding,
       child: Row(
         children: [
-          ScanThumb(path: scan.imagePath),
+          ScanThumb(path: scan.imagePath, size: 52, radius: 14),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -267,30 +268,8 @@ class ScanTile extends StatelessWidget {
                     fontSize: 15.5,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        AppText.of(context).category(scan.category),
-                        style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 6),
+                CategoryBadge(category: scan.category),
               ],
             ),
           ),
@@ -303,6 +282,52 @@ class ScanTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Rounded square with a tinted background behind an icon.
+class IconTile extends StatelessWidget {
+  const IconTile({
+    super.key,
+    required this.icon,
+    this.color = Brand.green,
+    this.size = 40,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.10),
+      borderRadius: BorderRadius.circular(size * 0.3),
+    ),
+    child: Icon(icon, color: color, size: size * 0.52),
+  );
+}
+
+/// Grey card holding rows separated by hairlines.
+class GroupCard extends StatelessWidget {
+  const GroupCard({super.key, required this.children, this.indent = 16});
+
+  final List<Widget> children;
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) Divider(indent: indent, endIndent: 16),
+          children[i],
+        ],
+      ],
+    ),
+  );
 }
 
 class EmptyState extends StatelessWidget {

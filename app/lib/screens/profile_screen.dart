@@ -28,30 +28,33 @@ class ProfileScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Row(
-              children: [
-                UserAvatar(user: user, radius: 30),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(user.displayName, style: text.titleLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        '@${user.username} · ${t.role(user.role)}',
-                        style: text.bodySmall,
-                      ),
-                    ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  UserAvatar(user: user, radius: 30),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(user.displayName, style: text.titleLarge),
+                        const SizedBox(height: 2),
+                        Text(
+                          '@${user.username} · ${t.role(user.role)}',
+                          style: text.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           SectionLabel(t.account),
-          _Group(
+          GroupCard(
+            indent: 70,
             children: [
               _Item(
                 icon: Icons.edit_outlined,
@@ -77,7 +80,8 @@ class ProfileScreen extends StatelessWidget {
           ),
           if (user.isResearcher) ...[
             SectionLabel(t.research),
-            _Group(
+            GroupCard(
+              indent: 70,
               children: [
                 _Item(
                   icon: Icons.group_outlined,
@@ -108,7 +112,8 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
           SectionLabel(t.myData),
-          _Group(
+          GroupCard(
+            indent: 70,
             children: [
               _Item(
                 icon: Icons.delete_sweep_outlined,
@@ -119,7 +124,8 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           SectionLabel(t.about),
-          _Group(
+          GroupCard(
+            indent: 70,
             children: [
               _Item(
                 icon: Icons.info_outline_rounded,
@@ -260,25 +266,6 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class _Group extends StatelessWidget {
-  const _Group({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    clipBehavior: Clip.antiAlias,
-    child: Column(
-      children: [
-        for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) const Divider(indent: 64),
-          children[i],
-        ],
-      ],
-    ),
-  );
-}
-
 class _Item extends StatelessWidget {
   const _Item({
     required this.icon,
@@ -296,9 +283,9 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
-    leading: Icon(icon, color: color ?? Brand.inkSoft, size: 22),
-    minLeadingWidth: 28,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    leading: IconTile(icon: icon, color: color ?? Brand.green, size: 38),
+    minLeadingWidth: 38,
     title: Text(
       title,
       style: TextStyle(

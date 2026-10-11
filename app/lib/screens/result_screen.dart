@@ -38,7 +38,7 @@ class ResultScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20),
                     child: AspectRatio(
                       aspectRatio: 4 / 3,
                       child: LayoutBuilder(
@@ -50,57 +50,85 @@ class ResultScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Icon(categoryIcon(r.category), color: color, size: 30),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          t.category(r.category),
-                          style: text.headlineMedium!.copyWith(color: color),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            IconTile(
+                              icon: categoryIcon(r.category),
+                              color: color,
+                              size: 48,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.category(r.category),
+                                    style: text.headlineSmall!.copyWith(
+                                      color: color,
+                                    ),
+                                  ),
+                                  if (r.crop != null)
+                                    Text(t.crop(r.crop), style: text.bodySmall),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        if (showConfidence) ...[
+                          const SizedBox(height: 18),
+                          ConfidenceBar(value: r.confidence, color: color),
+                        ],
+                        if (reason.isNotEmpty) ...[
+                          const SizedBox(height: 14),
+                          Text(
+                            reason,
+                            style: text.bodyMedium!.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  if (r.crop != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      t.crop(r.crop),
-                      style: text.bodyLarge!.copyWith(color: Brand.inkSoft),
-                    ),
-                  ],
-                  if (showConfidence) ...[
-                    const SizedBox(height: 20),
-                    ConfidenceBar(value: r.confidence, color: color),
-                  ],
-                  if (reason.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    Text(
-                      reason,
-                      style: text.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
                   if (outcome.rule != null) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(18),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              t.whatToDo,
-                              style: text.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                            const IconTile(
+                              icon: Icons.lightbulb_outline_rounded,
+                              size: 36,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              t.advice(outcome.rule!.id, outcome.rule!.advice),
-                              style: text.bodyLarge,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(t.whatToDo, style: text.titleMedium),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    t.advice(
+                                      outcome.rule!.id,
+                                      outcome.rule!.advice,
+                                    ),
+                                    style: text.bodyLarge,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

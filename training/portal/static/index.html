@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HarvestShelf Training</title>
+<style>
+@font-face { font-family: Nunito; font-weight: 400; src: url(/fonts/Nunito-400.ttf); }
+@font-face { font-family: Nunito; font-weight: 600; src: url(/fonts/Nunito-600.ttf); }
+@font-face { font-family: Nunito; font-weight: 700; src: url(/fonts/Nunito-700.ttf); }
+@font-face { font-family: Nunito; font-weight: 800; src: url(/fonts/Nunito-800.ttf); }
+
+:root {
+  --green: #1E5E39; --green-tint: rgba(30, 94, 57, .10);
+  --bg: #FFFFFF; --surface: #F4F5F2; --line: #E9EAE5;
+  --ink: #17201B; --ink-soft: #68716C; --danger: #B3261E;
+  --fresh: #2E7D4F; --sell_soon: #8F5B00; --discount_today: #B4470A;
+  --spoilage_risk: #B3261E; --unusable: #5F6368;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15.5px/1.45 Nunito, system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { margin: 0; letter-spacing: -.2px; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 14px; }
+
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar { max-width: 1080px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+.brand .dot { width: 30px; height: 30px; border-radius: 9px; background: var(--green); display: grid; place-items: center; color: #fff; font-size: 16px; }
+.brand span { color: var(--ink-soft); font-weight: 700; }
+nav { display: flex; gap: 4px; margin-left: auto; }
+nav button { border: 0; background: none; padding: 8px 16px; border-radius: 999px; font-weight: 700; color: var(--ink-soft); cursor: pointer; }
+nav button.on { background: var(--green-tint); color: var(--green); }
+
+main { max-width: 1080px; margin: 0 auto; padding: 28px 24px 64px; }
+section[hidden] { display: none; }
+.head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.head h1 { font-size: 26px; font-weight: 800; }
+.card { background: var(--surface); border-radius: 20px; padding: 20px; }
+.grid2 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+
+label.f { display: block; font-weight: 700; font-size: 14px; margin: 14px 0 6px; }
+form > label.f:first-child { margin-top: 0; }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  width: 100%; background: var(--bg); border: 1.5px solid transparent; border-radius: 12px; padding: 11px 13px; outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--green); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hint { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 1.5px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.seg button.on { border-color: var(--green); background: var(--green); color: #fff; }
+.seg button:disabled { opacity: .4; cursor: not-allowed; }
+.swatch { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.seg button.on .swatch { background: #fff !important; }
+
+.btn { border: 0; border-radius: 14px; padding: 13px 20px; font-weight: 800; cursor: pointer; background: var(--green); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.block { width: 100%; margin-top: 18px; }
+.btn.ghost { background: var(--bg); color: var(--ink); border: 1.5px solid var(--line); }
+.btn.sm { padding: 7px 12px; border-radius: 10px; font-size: 14px; }
+.btn.danger { background: var(--bg); color: var(--danger); border: 1.5px solid var(--line); }
+.link { border: 0; background: none; color: var(--green); font-weight: 700; cursor: pointer; padding: 0; text-align: left; }
+
+.drop { border: 2px dashed #CBD0C8; border-radius: 20px; background: var(--bg); padding: 64px 20px; text-align: center; cursor: pointer; transition: .15s; }
+.drop.over { border-color: var(--green); background: var(--green-tint); }
+.drop .big { font-weight: 800; font-size: 17px; }
+.previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-top: 14px; }
+.previews div { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--line); }
+.previews img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.previews button { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(23,32,27,.75); color: #fff; cursor: pointer; font-size: 13px; line-height: 1; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+.meter { height: 6px; border-radius: 3px; background: var(--line); margin-top: 5px; overflow: hidden; min-width: 60px; }
+.meter i { display: block; height: 100%; border-radius: 3px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat { background: var(--surface); border-radius: 16px; padding: 14px 16px; }
+.stat b { display: block; font-size: 24px; font-weight: 800; }
+
+.filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 22px 0 14px; }
+.filters select { width: auto; background: var(--surface); }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.photo { background: var(--surface); border-radius: 16px; overflow: hidden; }
+.photo img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--line); }
+.photo .body { padding: 10px 12px 12px; }
+.photo .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.photo select { padding: 6px 8px; font-size: 13px; border-radius: 9px; margin-top: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 12.5px; }
+.empty { text-align: center; padding: 48px 20px; color: var(--ink-soft); }
+
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+.steps span { font-size: 13px; font-weight: 700; padding: 5px 11px; border-radius: 999px; background: var(--bg); color: var(--ink-soft); }
+.steps span.done { background: var(--green-tint); color: var(--green); }
+.steps span.now { background: var(--green); color: #fff; }
+.steps span.fail { background: rgba(179,38,30,.12); color: var(--danger); }
+pre.log { background: #10170F; color: #D8E3D6; border-radius: 14px; padding: 14px; height: 320px; overflow: auto; font: 12.5px/1.5 ui-monospace, Menlo, monospace; margin: 0; white-space: pre-wrap; word-break: break-word; }
+.status { font-weight: 800; font-size: 13px; padding: 3px 10px; border-radius: 999px; }
+.status.running { background: var(--green-tint); color: var(--green); }
+.status.done { background: rgba(46,125,79,.12); color: var(--fresh); }
+.status.failed, .status.stopped { background: rgba(179,38,30,.10); color: var(--danger); }
+.check { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; cursor: pointer; }
+.check input { margin-top: 4px; accent-color: var(--green); width: 17px; height: 17px; }
+.runs td { vertical-align: middle; }
+.good { color: var(--fresh); } .bad { color: var(--danger); }
+.installed { background: var(--green); color: #fff; font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+.scroll { overflow-x: auto; }
+.error { color: var(--danger); font-weight: 700; margin-top: 10px; }
+
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 14px; font-weight: 700; opacity: 0; transition: .2s; pointer-events: none; z-index: 10; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; transform: translateX(-50%); }
+dialog { border: 0; border-radius: 20px; padding: 0; max-width: 720px; width: calc(100% - 32px); }
+dialog::backdrop { background: rgba(23,32,27,.45); }
+dialog .in { padding: 22px; }
+dialog img { width: 100%; border-radius: 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><div class="dot">✓</div>HarvestShelf <span>Training portal</span></div>
+    <nav>
+      <button data-tab="upload" class="on">Upload</button>
+      <button data-tab="photos">Photos</button>
+      <button data-tab="train">Train</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- UPLOAD -->
+  <section id="upload">
+    <div class="head">
+      <div>
+        <h1>Add photos</h1>
+        <div class="muted">Every photo in one upload gets the same crop, label and batch.</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="drop" id="drop">
+          <div class="big">Drop photos here</div>
+          <div class="muted small">or click to choose · JPG or PNG</div>
+          <input type="file" id="file" accept="image/jpeg,image/png" multiple hidden>
+        </div>
+        <div class="previews" id="previews"></div>
+      </div>
+      <form class="card" id="uform" autocomplete="off">
+        <label class="f">Crop</label>
+        <div class="seg" id="crop"></div>
+        <label class="f">Label</label>
+        <div class="seg" id="label"></div>
+        <div class="hint">Other produce is always "Unusable".</div>
+        <div class="row">
+          <div><label class="f" for="market">Market</label><input type="text" id="market" placeholder="kamembe" required></div>
+          <div><label class="f" for="district">District</label>
+            <select id="district"><option>nyabihu</option><option>rusizi</option><option value="other">other</option></select></div>
+        </div>
+        <div class="row">
+          <div><label class="f" for="date">Date taken</label><input type="date" id="date" required></div>
+          <div><label class="f" for="phone">Phone model</label><input type="text" id="phone" placeholder="Tecno Spark 10"></div>
+        </div>
+        <label class="f" for="batch">Batch ID</label>
+        <input type="text" id="batch" required>
+        <div class="hint">Same item or batch on the same day. Photos of one batch never cross train and test.</div>
+        <label class="f" for="notes">Notes <span class="muted">(optional)</span></label>
+        <input type="text" id="notes">
+        <button class="btn block" id="ubtn" type="submit" disabled>Upload photos</button>
+        <div class="error" id="uerr"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- PHOTOS -->
+  <section id="photos" hidden>
+    <div class="head">
+      <div><h1>Photos</h1><div class="muted">Field photos in data/raw, listed in data/metadata.csv.</div></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="card scroll"><table id="counts"></table></div>
+    <div class="filters">
+      <b>Show</b>
+      <select id="fcrop"><option value="">All crops</option></select>
+      <select id="flabel"><option value="">All labels</option></select>
+      <select id="fbatch"><option value="">All batches</option></select>
+      <span class="muted small" id="fcount"></span>
+    </div>
+    <div class="photos" id="grid"></div>
+  </section>
+
+  <!-- TRAIN -->
+  <section id="train" hidden>
+    <div class="head">
+      <div><h1>Train a model</h1><div class="muted">Runs clean → split → train → thresholds → test → export on this computer.</div></div>
+      <div class="muted small" id="installedNote"></div>
+    </div>
+    <div class="grid2">
+      <form class="card" id="tform">
+        <label class="f" for="model">Model</label>
+        <select id="model"></select>
+        <div class="hint" id="modelHint"></div>
+        <div class="row">
+          <div><label class="f" for="he">Head epochs</label><input type="number" id="he" min="1" max="100"></div>
+          <div><label class="f" for="fe">Fine-tune epochs</label><input type="number" id="fe" min="0" max="100"></div>
+        </div>
+        <div class="hint">Fewer epochs = faster but less accurate. 1 + 0 is a quick check that everything works.</div>
+        <label class="check"><input type="checkbox" id="pub" checked>
+          <span><b>Include public photos</b><br><span class="muted small">Adds ~3,000 AgriFreshNET photos (Bangladesh). Needed until you have enough field batches to split.</span></span></label>
+        <label class="check"><input type="checkbox" id="strict">
+          <span><b>Require labeler agreement</b><br><span class="muted small">Stop if Cohen's kappa on double-labelled photos is below 0.70.</span></span></label>
+        <button class="btn block" id="tbtn" type="submit">Start training</button>
+        <div class="error" id="terr"></div>
+      </form>
+      <div class="card" id="current">
+        <div class="empty">No training run yet.</div>
+      </div>
+    </div>
+    <h2 style="margin:32px 0 12px;font-size:19px">Runs</h2>
+    <div class="card scroll"><table class="runs" id="runs"></table></div>
+  </section>
+</main>
+
+<dialog id="dlg"><div class="in" id="dlgBody"></div></dialog>
+<div id="toast"></div>
+
+<script>
+const NICE = { tomato: 'Tomato', banana: 'Green banana', other: 'Other produce',
+  fresh: 'Fresh', sell_soon: 'Sell soon', discount_today: 'Discount today', spoilage_risk: 'Spoilage risk', unusable: 'Unusable' };
+const LABELS = ['fresh', 'sell_soon', 'discount_today', 'spoilage_risk', 'unusable'];
+const TARGET = { unusable: 200, default: 300 };  // collection targets per label
+const $ = s => document.querySelector(s);
+const nice = k => NICE[k] || k;
+const color = l => `var(--${l})`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pct = v => v == null ? '–' : (v * 100).toFixed(1) + '%';
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3200);
+}
+async function api(url, opts = {}) {
+  const r = await fetch(url, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || `${r.status} ${r.statusText}`);
+  return body;
+}
+function pill(label) {
+  const c = color(label);
+  return `<span class="pill" style="color:${c};background:color-mix(in srgb, ${c} 12%, transparent)">${esc(nice(label))}</span>`;
+}
+
+/* ---------- tabs ---------- */
+let tab = 'upload';
+function show(name) {
+  tab = name;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== name);
+  history.replaceState(null, '', '#' + name);
+  if (name === 'photos') loadPhotos();
+  if (name === 'train') loadTrain();
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.tab));
+
+/* ---------- upload ---------- */
+let files = [], crop = 'tomato', label = 'fresh', meta = null;
+
+function segment(el, items, value, onPick, disabled = () => false) {
+  el.innerHTML = items.map(k => `<button type="button" data-k="${k}" class="${k === value ? 'on' : ''}" ${disabled(k) ? 'disabled' : ''}>` +
+    (LABELS.includes(k) ? `<i class="swatch" style="background:${color(k)}"></i>` : '') + `${esc(nice(k))}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => onPick(b.dataset.k));
+}
+function renderSegments() {
+  if (crop === 'other') label = 'unusable';
+  segment($('#crop'), meta.crops, crop, k => { crop = k; renderSegments(); suggestBatch(); });
+  segment($('#label'), meta.labels, label, k => { label = k; renderSegments(); },
+    k => crop === 'other' && k !== 'unusable');
+}
+function slug(s) { return s.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, ''); }
+let batchEdited = false;
+function suggestBatch() {
+  if (batchEdited) return;
+  const m = slug($('#market').value) || 'market';
+  $('#batch').value = `${m}_${$('#date').value}_${crop}`;
+}
+$('#batch').oninput = () => batchEdited = $('#batch').value !== '';
+$('#market').oninput = suggestBatch;
+$('#date').oninput = suggestBatch;
+
+function addFiles(list) {
+  for (const f of list) if (/image\/(jpeg|png)/.test(f.type)) files.push({ f, url: URL.createObjectURL(f) });
+  renderPreviews();
+}
+function renderPreviews() {
+  $('#previews').innerHTML = files.map((x, i) => `<div><img src="${x.url}" alt=""><button type="button" data-i="${i}" aria-label="Remove">✕</button></div>`).join('');
+  $('#previews').querySelectorAll('button').forEach(b => b.onclick = () => {
+    URL.revokeObjectURL(files[b.dataset.i].url); files.splice(b.dataset.i, 1); renderPreviews();
+  });
+  $('#ubtn').disabled = !files.length;
+  $('#ubtn').textContent = files.length ? `Upload ${files.length} photo${files.length > 1 ? 's' : ''}` : 'Upload photos';
+}
+const drop = $('#drop');
+drop.onclick = () => $('#file').click();
+$('#file').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+
+$('#uform').onsubmit = async e => {
+  e.preventDefault();
+  $('#uerr').textContent = '';
+  const fd = new FormData();
+  fd.append('crop', crop); fd.append('label', label);
+  fd.append('market', slug($('#market').value)); fd.append('district', $('#district').value);
+  fd.append('date', $('#date').value); fd.append('phone_model', $('#phone').value);
+  fd.append('batch_id', slug($('#batch').value)); fd.append('notes', $('#notes').value);
+  files.forEach(x => fd.append('photos', x.f, x.f.name));
+  const btn = $('#ubtn'); btn.disabled = true; btn.textContent = 'Uploading…';
+  try {
+    const r = await api('/api/photos', { method: 'POST', body: fd });
+    files.forEach(x => URL.revokeObjectURL(x.url)); files = [];
+    renderPreviews();
+    toast(`Saved ${r.saved} photo${r.saved > 1 ? 's' : ''} as ${nice(crop)} · ${nice(label)}`);
+    try { localStorage.setItem('upload', JSON.stringify({ market: $('#market').value, district: $('#district').value, phone: $('#phone').value })); } catch {}
+  } catch (err) {
+    $('#uerr').textContent = err.message; renderPreviews();
+  }
+};
+
+/* ---------- photos ---------- */
+let data = null;
+async function loadPhotos() {
+  data = await api('/api/dataset');
+  const s = data.summary;
+  $('#stats').innerHTML = [
+    ['Photos', s.total], ['Batches', s.batches], ['Double-labelled', s.double_labelled], ['Labels disagree', s.disagreements],
+  ].map(([k, v]) => `<div class="stat"><b>${v}</b><span class="muted small">${k}</span></div>`).join('');
+  const labels = data.labels, crops = data.crops.filter(c => c !== 'other');
+  const cell = (n, l) => {
+    const t = TARGET[l] || TARGET.default, w = Math.min(100, n / t * 100);
+    return `<td class="num">${n} <span class="muted small" style="font-weight:600">/ ${t}</span><div class="meter"><i style="width:${w}%;background:${color(l)}"></i></div></td>`;
+  };
+  $('#counts').innerHTML = `<tr><th></th>${labels.filter(l => l !== 'unusable').map(l => `<th>${nice(l)}</th>`).join('')}<th>Unusable (all crops)</th></tr>` +
+    crops.map((c, i) => `<tr><td><b>${nice(c)}</b></td>${labels.filter(l => l !== 'unusable').map(l => cell(s.counts[c][l], l)).join('')}` +
+      (i === 0 ? `<td rowspan="${crops.length}" style="vertical-align:top;border-bottom:0">${cellInner(Object.values(s.counts).reduce((a, x) => a + x.unusable, 0))}</td>` : '') + '</tr>').join('');
+  function cellInner(n) {
+    const w = Math.min(100, n / TARGET.unusable * 100);
+    return `<span class="num" style="font-weight:700">${n}</span> <span class="muted small">/ ${TARGET.unusable}</span><div class="meter"><i style="width:${w}%;background:var(--unusable)"></i></div>`;
+  }
+  fillSelect($('#fcrop'), data.crops, 'All crops');
+  fillSelect($('#flabel'), data.labels, 'All labels');
+  fillSelect($('#fbatch'), [...new Set(data.photos.map(p => p.batch_id))].sort(), 'All batches', x => x);
+  renderGrid();
+}
+function fillSelect(el, items, all, fmt = nice) {
+  const v = el.value;
+  el.innerHTML = `<option value="">${all}</option>` + items.map(k => `<option value="${esc(k)}">${esc(fmt(k))}</option>`).join('');
+  el.value = items.includes(v) ? v : '';
+}
+['#fcrop', '#flabel', '#fbatch'].forEach(s => $(s).onchange = renderGrid);
+function renderGrid() {
+  const fc = $('#fcrop').value, fl = $('#flabel').value, fb = $('#fbatch').value;
+  const list = data.photos.filter(p => (!fc || p.crop === fc) && (!fl || (p.final_label || p.label_a) === fl) && (!fb || p.batch_id === fb));
+  $('#fcount').textContent = `${list.length} of ${data.photos.length}`;
+  if (!data.photos.length) {
+    $('#grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No field photos yet. <button class="link" onclick="show('upload')">Upload some</button></div>`;
+    return;
+  }
+  const shown = list.slice(0, 300);
+  $('#grid').innerHTML = shown.map(p => {
+    const l = p.final_label || p.label_a;
+    const opts = ['', ...data.labels].map(k => `<option value="${k}" ${k === p.label_b ? 'selected' : ''}>${k ? nice(k) : '2nd label: none'}</option>`).join('');
+    const disagree = p.label_b && p.label_b !== p.label_a && !p.final_label;
+    return `<div class="photo">
+      <img loading="lazy" src="/thumb/${encodeURI(p.file)}" alt="">
+      <div class="body">
+        <div class="top">${pill(l)}<b class="small">${esc(p.image_id)}</b></div>
+        <div class="muted small" style="margin-top:4px">${esc(nice(p.crop))} · ${esc(p.batch_id)}</div>
+        ${disagree ? `<div class="small bad" style="font-weight:700;margin-top:4px">Labels disagree: set a final label</div>` : ''}
+        <select data-id="${esc(p.image_id)}" data-k="label_b" title="Second labeler">${opts}</select>
+        ${disagree ? `<select data-id="${esc(p.image_id)}" data-k="final_label">${['', ...data.labels].map(k => `<option value="${k}">${k ? 'Final: ' + nice(k) : 'Final label…'}</option>`).join('')}</select>` : ''}
+        <div style="margin-top:8px;text-align:right"><button class="btn danger sm" data-del="${esc(p.image_id)}">Delete</button></div>
+      </div></div>`;
+  }).join('') + (list.length > shown.length ? `<div class="muted small" style="grid-column:1/-1">Showing the newest ${shown.length}. Use the filters to see others.</div>` : '');
+  $('#grid').querySelectorAll('select').forEach(sel => sel.onchange = async () => {
+    try { await api(`/api/photos/${sel.dataset.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [sel.dataset.k]: sel.value }) }); loadPhotos(); }
+    catch (err) { toast(err.message); }
+  });
+  $('#grid').querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete photo ${b.dataset.del}? The file is removed from data/raw.`)) return;
+    try { await api(`/api/photos/${b.dataset.del}`, { method: 'DELETE' }); toast('Photo deleted'); loadPhotos(); }
+    catch (err) { toast(err.message); }
+  });
+}
+
+/* ---------- train ---------- */
+let train = null, watching = null, logTimer = null;
+async function loadTrain(keepForm) {
+  train = await api('/api/train');
+  if (!keepForm) {
+    $('#model').innerHTML = Object.entries(train.models).map(([k]) => `<option value="${k}">${k}</option>`).join('');
+    $('#model').value = 'efficientnet_lite0';
+    $('#he').placeholder = train.defaults.head_epochs; $('#fe').placeholder = train.defaults.finetune_epochs;
+    $('#pub').disabled = !train.public_available;
+    if (!train.public_available) { $('#pub').checked = false; }
+    $('#modelHint').textContent = train.models[$('#model').value];
+  }
+  $('#installedNote').innerHTML = train.installed ? `In the app now: <b>${esc(train.installed)}</b>` : '';
+  const running = train.jobs.find(j => j.status === 'running');
+  $('#tbtn').disabled = !!running;
+  $('#tbtn').textContent = running ? 'Training in progress…' : 'Start training';
+  renderRuns();
+  const pick = running || train.jobs.find(j => j.name === watching) || train.jobs[0];
+  if (pick) watch(pick.name); else $('#current').innerHTML = '<div class="empty">No training run yet.</div>';
+}
+$('#model').onchange = () => $('#modelHint').textContent = train.models[$('#model').value];
+
+$('#tform').onsubmit = async e => {
+  e.preventDefault(); $('#terr').textContent = '';
+  try {
+    const r = await api('/api/train', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      model: $('#model').value, public: $('#pub').checked, strict_kappa: $('#strict').checked,
+      head_epochs: $('#he').value, finetune_epochs: $('#fe').value }) });
+    watching = r.name; toast('Training started'); loadTrain(true);
+  } catch (err) { $('#terr').textContent = err.message; }
+};
+
+function watch(name) {
+  watching = name;
+  clearTimeout(logTimer);
+  const tick = async () => {
+    if (tab !== 'train' || watching !== name) return;
+    let r;
+    try { r = await api(`/api/train/${name}/log`); } catch { return; }
+    renderCurrent(r.job, r.log);
+    if (r.job.status === 'running') logTimer = setTimeout(tick, 2000);
+    else if ($('#tbtn').disabled) loadTrain(true);
+  };
+  tick();
+}
+function renderCurrent(job, log) {
+  const pre = $('#current pre');
+  const atBottom = !pre || pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 30;
+  const idx = train.stages.indexOf(job.stage);
+  const steps = train.stages.map((s, i) => {
+    let c = '';
+    if (job.status === 'done' || i < idx) c = 'done';
+    else if (i === idx) c = job.status === 'running' ? 'now' : job.status === 'done' ? 'done' : 'fail';
+    return `<span class="${c}">${s}</span>`;
+  }).join('');
+  const epochs = [...log.matchAll(/Epoch (\d+)\/(\d+)/g)].pop();
+  $('#current').innerHTML = `
+    <div class="top" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><b>${esc(job.name)}</b><div class="muted small">${esc(job.model)}${job.sources ? ' · ' + Object.entries(job.sources).map(([k, v]) => `${v} ${k}`).join(' + ') + ' photos' : ''}</div></div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="status ${job.status}">${job.status}</span>
+      ${job.status === 'running' ? `<button class="btn danger sm" id="stopBtn">Stop</button>` : ''}</div>
+    </div>
+    <div class="steps">${steps}</div>
+    ${job.status === 'running' && job.stage === 'train' && epochs ? `<div class="small muted" style="margin-bottom:8px">Epoch ${epochs[1]} of ${epochs[2]} (current stage)</div>` : ''}
+    ${job.error ? `<div class="error" style="margin:0 0 10px">${esc(job.error)}</div>` : ''}
+    <pre class="log">${esc(log) || 'Starting…'}</pre>`;
+  const p = $('#current pre');
+  if (atBottom) p.scrollTop = p.scrollHeight;
+  const stop = $('#stopBtn');
+  if (stop) stop.onclick = async () => {
+    if (!confirm('Stop this training run?')) return;
+    await api(`/api/train/${job.name}/stop`, { method: 'POST' }); loadTrain(true);
+  };
+}
+function renderRuns() {
+  if (!train.jobs.length) { $('#runs').innerHTML = '<tr><td class="empty">Finished runs appear here with their test results.</td></tr>'; return; }
+  const ok = (v, target, lower) => v == null ? '' : (lower ? v <= target : v >= target) ? 'good' : 'bad';
+  $('#runs').innerHTML = `<tr><th>Run</th><th>Status</th><th>Photos</th><th title="Macro-F1 over the 4 actions, test set">Action F1</th>
+    <th title="Target ≥ 85%">Spoilage recall</th><th title="Target ≤ 15%">Uncertain</th><th>Size</th><th></th></tr>` +
+    train.jobs.map(j => {
+      const m = j.metrics || {}, e = j.export || {};
+      const isIn = train.installed === j.name;
+      return `<tr>
+        <td><button class="link" data-watch="${esc(j.name)}">${esc(j.name)}</button>${isIn ? '<span class="installed">in app</span>' : ''}
+          <div class="muted small">${esc(j.model)} · ${esc((j.started || '').replace('T', ' '))}</div></td>
+        <td><span class="status ${j.status}">${j.status}</span></td>
+        <td class="num">${j.images ?? '–'}${j.settings?.public ? '<div class="muted small" style="font-weight:600">incl. public</div>' : ''}</td>
+        <td class="num">${pct(m.action_macro_f1)}</td>
+        <td class="num ${ok(m.spoilage_recall, .85)}">${pct(m.spoilage_recall)}</td>
+        <td class="num ${ok(m.uncertain_rate, .15, true)}">${pct(m.uncertain_rate)}</td>
+        <td class="num ${e.size_mb > 10 ? 'bad' : ''}">${e.size_mb != null ? e.size_mb + ' MB' : '–'}</td>
+        <td style="white-space:nowrap;text-align:right">
+          ${j.status === 'done' ? `<button class="btn ghost sm" data-cm="${esc(j.name)}">Results</button> <button class="btn sm" data-inst="${esc(j.name)}" ${isIn ? 'disabled' : ''}>Install in app</button>` : ''}
+          ${j.status !== 'running' ? ` <button class="btn danger sm" data-rm="${esc(j.name)}" aria-label="Delete run">✕</button>` : ''}
+        </td></tr>`;
+    }).join('');
+  $('#runs').querySelectorAll('[data-watch]').forEach(b => b.onclick = () => watch(b.dataset.watch));
+  $('#runs').querySelectorAll('[data-cm]').forEach(b => b.onclick = () => results(b.dataset.cm));
+  $('#runs').querySelectorAll('[data-inst]').forEach(b => b.onclick = async () => {
+    const j = train.jobs.find(x => x.name === b.dataset.inst);
+    const warn = (j.export?.size_mb > 10 ? '\n\nWarning: larger than the 10 MB target.' : '') +
+      ((j.metrics?.spoilage_recall ?? 1) < .85 ? '\n\nWarning: spoilage recall is below the 85% target.' : '');
+    if (!confirm(`Copy ${j.name} into app/assets/model? Rebuild the app to use it.${warn}`)) return;
+    b.disabled = true;
+    try { await api(`/api/train/${j.name}/install`, { method: 'POST' }); toast('Installed. Rebuild the app to use it.'); loadTrain(true); }
+    catch (err) { toast(err.message); b.disabled = false; }
+  });
+  $('#runs').querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete run ${b.dataset.rm} and its model files?`)) return;
+    try { await api(`/api/train/${b.dataset.rm}`, { method: 'DELETE' }); loadTrain(true); }
+    catch (err) { toast(err.message); }
+  });
+}
+function results(name) {
+  const j = train.jobs.find(x => x.name === name), m = j.metrics || {}, t = j.thresholds || {}, e = j.export || {};
+  const rows = [['Action macro-F1', pct(m.action_macro_f1)], ['Action accuracy', pct(m.action_accuracy)],
+    ['Spoilage recall (target ≥ 85%)', pct(m.spoilage_recall)], ['Uncertain rate (target ≤ 15%)', pct(m.uncertain_rate)],
+    ['Unusable photos rejected', pct(m.unusable_rejected_rate)], ['Thresholds', `t_conf ${t.t_conf ?? '–'} · t_spoil ${t.t_spoil ?? '–'}`],
+    ['Phone model', `${e.size_mb ?? '–'} MB · ${e.quantization ?? '–'} · TFLite agreement ${pct(e.top1_agreement)}`]];
+  $('#dlgBody').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h2 style="font-size:19px">${esc(name)}</h2><button class="btn ghost sm" onclick="dlg.close()">Close</button></div>
+    <p class="muted small">Measured on the held-out test batches.</p>
+    <table>${rows.map(([k, v]) => `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('')}</table>
+    <img src="/api/train/${encodeURIComponent(name)}/confusion.png" alt="Confusion matrix on the test set" onerror="this.remove()">`;
+  dlg.showModal();
+}
+const dlg = $('#dlg');
+dlg.onclick = e => { if (e.target === dlg) dlg.close(); };
+
+/* ---------- init ---------- */
+(async function init() {
+  const d = new Date(); $('#date').value = new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  try {
+    const saved = JSON.parse(localStorage.getItem('upload') || '{}');
+    if (saved.market) $('#market').value = saved.market;
+    if (saved.district) $('#district').value = saved.district;
+    if (saved.phone) $('#phone').value = saved.phone;
+  } catch {}
+  meta = await api('/api/dataset');
+  renderSegments(); suggestBatch();
+  const start = location.hash.slice(1);
+  show(['upload', 'photos', 'train'].includes(start) ? start : 'upload');
+})();
+</script>
+</body>
+</html>

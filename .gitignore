@@ -3,8 +3,6 @@ data/raw/*
 data/processed/
 data/splits/
 !data/raw/.gitkeep
-evaluation/device_logs/*.csv
-evaluation/usability/*_scored.csv
 
 # Training
 training/.venv/

@@ -66,6 +66,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     children: [
                       _Filter(
                         label: t.all,
+                        color: null,
                         selected: _filter == null,
                         onTap: () => setState(() => _filter = null),
                       ),
@@ -73,6 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         if (all.any((s) => s.category == c))
                           _Filter(
                             label: t.category(c),
+                            color: categoryColor(c),
                             selected: _filter == c,
                             onTap: () => setState(
                               () => _filter = _filter == c ? null : c,
@@ -83,7 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 for (final group in _byDay(scans)) ...[
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
                     child: Text(
                       t.formatDay(group.first.createdAt),
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -91,10 +93,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     ),
                   ),
-                  for (var i = 0; i < group.length; i++) ...[
-                    if (i > 0) const Divider(indent: 82, endIndent: 20),
-                    ScanTile(scan: group[i]),
-                  ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GroupCard(
+                      indent: 82,
+                      children: [for (final s in group) ScanTile(scan: s)],
+                    ),
+                  ),
                 ],
               ],
             );
@@ -124,11 +129,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
 class _Filter extends StatelessWidget {
   const _Filter({
     required this.label,
+    required this.color,
     required this.selected,
     required this.onTap,
   });
 
   final String label;
+  final Color? color;
   final bool selected;
   final VoidCallback onTap;
 
@@ -136,20 +143,36 @@ class _Filter extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(right: 8),
     child: Material(
-      color: selected ? Brand.ink : Brand.surface,
+      color: selected ? Brand.green : Brand.surface,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-              color: selected ? Colors.white : Brand.ink,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (color != null) ...[
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: selected ? Colors.white : color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: selected ? Colors.white : Brand.ink,
+                ),
+              ),
+            ],
           ),
         ),
       ),

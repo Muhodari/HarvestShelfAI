@@ -3,7 +3,7 @@ PY ?= python
 MODELS = efficientnet_lite0 mobilenet_v3_small efficientnet_v2_b0 resnet50
 FOLDS = 0 1 2 3 4
 
-.PHONY: test clean-data split cv classical compare final thresholds export demo smoke data-public public
+.PHONY: test clean-data split cv classical compare final thresholds export demo smoke data-public public portal
 
 test:
 	$(PY) -m pytest -q tests
@@ -49,3 +49,7 @@ public: data-public
 	$(PY) -m tools.public_experiment --source "sandbox/public/extracted/Processed Data" \
 	    --models efficientnet_lite0 mobilenet_v3_small efficientnet_v2_b0 resnet50 --classical \
 	    --install-in-app --no-install mobilenet
+
+# Browser portal to upload labelled photos and train: http://127.0.0.1:8765
+portal:
+	$(PY) -m portal

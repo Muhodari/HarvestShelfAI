@@ -3,7 +3,7 @@
 
 paths:
   raw_dir: ../data/raw              # original phone photos
-  metadata: ../data/metadata.csv    # one row per photo, see docs/data_collection.md
+  metadata: ../data/metadata.csv    # one row per photo (columns: portal/dataset.py COLUMNS)
   processed_dir: ../data/processed  # resized copies + clean.csv
   splits_dir: ../data/splits        # train/val/test csv files
   experiments_dir: experiments      # one folder per training run

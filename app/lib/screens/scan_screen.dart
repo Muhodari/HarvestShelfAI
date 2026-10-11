@@ -104,30 +104,13 @@ class _ScanScreenState extends State<ScanScreen> {
                   short: meta.isDemo ? t.demoShort : t.interimShort,
                 ),
               ],
-              const SizedBox(height: 28),
-              FilledButton.icon(
-                key: const Key('scan_camera'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(64),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                icon: const Icon(Icons.photo_camera_rounded, size: 24),
-                label: Text(t.scanProduce, style: TextStyle(fontSize: 18)),
-                onPressed: _busy ? null : () => _scan(ImageSource.camera),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
+              const SizedBox(height: 24),
+              _ScanCard(busy: _busy, onTap: () => _scan(ImageSource.camera)),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
                 icon: const Icon(Icons.photo_library_outlined, size: 20),
                 label: Text(t.chooseFromGallery),
                 onPressed: _busy ? null : () => _scan(ImageSource.gallery),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                t.scanHint,
-                textAlign: TextAlign.center,
-                style: text.bodySmall,
               ),
               SectionLabel(t.today),
               _TodayTally(userId: user.id),
@@ -188,53 +171,143 @@ class _TodayTally extends StatelessWidget {
           ),
           builder: (context, snap) {
             final counts = snap.data ?? const {};
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 6,
-                ),
-                child: Row(
-                  children: [
-                    for (final c in const [
-                      TriageCategory.fresh,
-                      TriageCategory.sellSoon,
-                      TriageCategory.discountToday,
-                      TriageCategory.spoilageRisk,
-                    ])
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              '${counts[c] ?? 0}',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                t.categoryShort(c),
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: categoryColor(c),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+            return Row(
+              children: [
+                for (final (i, c) in const [
+                  TriageCategory.fresh,
+                  TriageCategory.sellSoon,
+                  TriageCategory.discountToday,
+                  TriageCategory.spoilageRisk,
+                ].indexed) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: _Stat(
+                      count: counts[c] ?? 0,
+                      label: t.categoryShort(c),
+                      color: categoryColor(c),
+                    ),
+                  ),
+                ],
+              ],
             );
           },
         );
       },
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({required this.count, required this.label, required this.color});
+
+  final int count;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+    decoration: BoxDecoration(
+      color: count > 0 ? color.withValues(alpha: 0.08) : Brand.surface,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Column(
+      children: [
+        Text(
+          '$count',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: count > 0 ? color : Brand.inkSoft,
+          ),
+        ),
+        const SizedBox(height: 2),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            maxLines: 1,
+            style: const TextStyle(
+              fontSize: 12.5,
+              color: Brand.inkSoft,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// The main action: a large green card with the photo tip under the label.
+class _ScanCard extends StatelessWidget {
+  const _ScanCard({required this.busy, required this.onTap});
+
+  final bool busy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppText.of(context);
+    return Semantics(
+      button: true,
+      enabled: !busy,
+      child: Material(
+        color: busy ? Brand.green.withValues(alpha: 0.5) : Brand.green,
+        borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: const Key('scan_camera'),
+          onTap: busy ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.photo_camera_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.scanProduce,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        t.scanHint,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontSize: 14,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -264,16 +337,9 @@ class _Recent extends StatelessWidget {
               ),
             );
           }
-          return Column(
-            children: [
-              for (var i = 0; i < scans.length; i++) ...[
-                if (i > 0) const Divider(indent: 62),
-                ScanTile(
-                  scan: scans[i],
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                ),
-              ],
-            ],
+          return GroupCard(
+            indent: 82,
+            children: [for (final s in scans) ScanTile(scan: s)],
           );
         },
       ),

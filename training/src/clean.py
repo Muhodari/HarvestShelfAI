@@ -77,7 +77,7 @@ def run(cfg: Config, force_kappa: bool = False) -> dict:
     min_kappa = cfg["labeling"]["min_kappa"]
     print(f"Cohen's kappa = {kappa} on {n_double} double-labelled images (need >= {min_kappa})")
     if kappa is None or kappa < min_kappa:
-        msg = "Labeler agreement is below target: discuss disagreements and update docs/labeling_guide.md."
+        msg = "Labeler agreement is below target: discuss disagreements and agree on the label definitions."
         if not force_kappa:
             raise SystemExit(msg + " (use --force-kappa to continue anyway)")
         print("WARNING: " + msg)
