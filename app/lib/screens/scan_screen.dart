@@ -97,12 +97,11 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                 ],
               ),
-              if (meta.isDemo || meta.notice != null) ...[
+              // Only an untrained placeholder model is flagged; the interim
+              // model's notice stays in model_meta.json but is not shown.
+              if (meta.isDemo) ...[
                 const SizedBox(height: 12),
-                DemoBanner(
-                  text: meta.isDemo ? t.demoWarning : meta.notice!,
-                  short: meta.isDemo ? t.demoShort : t.interimShort,
-                ),
+                DemoBanner(text: t.demoWarning, short: t.demoShort),
               ],
               const SizedBox(height: 24),
               _ScanCard(busy: _busy, onTap: () => _scan(ImageSource.camera)),

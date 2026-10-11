@@ -71,9 +71,9 @@ void main() {
       expect(find.text('Sage'), findsOneWidget);
       expect(find.text('Scan produce'), findsOneWidget);
       expect(
-        find.text('Interim model · for testing only'),
+        find.textContaining('Demo model'),
         findsNothing,
-      ); // test meta has no notice
+      ); // only an untrained demo model shows a banner
 
       // A scan saved for this user shows up in History.
       final me = services.session.user!;

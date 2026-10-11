@@ -59,10 +59,6 @@ class AppText {
     'Demo model · results not meaningful',
     "Icyitegererezo cy'igerageza · ibisubizo ntibyizewe",
   );
-  String get interimShort => _t(
-    'Interim model · for testing only',
-    "Icyitegererezo cy'agateganyo · ni icy'igerageza gusa",
-  );
   String get aboutModel =>
       _t('About this model', "Ibyerekeye iki cyitegererezo");
   String get offlinePromise => _t(

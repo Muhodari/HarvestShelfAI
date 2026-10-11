@@ -57,7 +57,7 @@ Built for sellers in **Nyabihu and Rusizi, Rwanda**. BSc Software Engineering pr
 
 *Last updated: 11 Oct 2026*
 
-The app ships with an **interim model**. It was trained on the public **AgriFreshNET** dataset (CC BY 4.0, photos from Bangladesh), and a notice in the app says so.
+The app ships with an **interim model**. It was trained on the public **AgriFreshNET** dataset (CC BY 4.0, photos from Bangladesh).
 
 - **No Rwandan field photos have been collected yet.**
 - There are **no Discount Today examples** in the public data.
