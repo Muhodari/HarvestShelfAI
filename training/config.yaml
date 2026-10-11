@@ -1,0 +1,56 @@
+# HarvestShelf AI training configuration.
+# Relative paths are resolved against this file's directory.
+
+paths:
+  raw_dir: ../data/raw              # original phone photos
+  metadata: ../data/metadata.csv    # one row per photo, see docs/data_collection.md
+  processed_dir: ../data/processed  # resized copies + clean.csv
+  splits_dir: ../data/splits        # train/val/test csv files
+  experiments_dir: experiments      # one folder per training run
+  exports_dir: exports              # model.tflite + metadata for the app
+
+image_size: 224
+processed_short_side: 256           # stored size; random crops are taken from it
+
+# Output classes. Order is the model's output order and must not change
+# between training and export. "unusable" = blurred, dark, or not a
+# supported crop; the app turns it into Uncertain.
+crops: [tomato, banana]
+categories: [fresh, sell_soon, discount_today, spoilage_risk]
+
+# Same algorithm and defaults as the app (image_quality_service.dart).
+quality:
+  min_brightness: 40
+  max_brightness: 235
+  min_sharpness: 80               # sharpest-tile Laplacian variance, see src/quality.py
+
+labeling:
+  min_kappa: 0.70
+
+split:
+  group_col: batch_id               # photos of one batch never cross splits
+  test_frac: 0.15
+  val_frac: 0.15
+  n_folds: 5                        # grouped CV folds over train+val
+  seed: 42
+
+train:
+  batch_size: 32
+  head_epochs: 10
+  finetune_epochs: 10
+  head_lr: 0.001
+  finetune_lr: 0.00001
+  dropout: 0.2
+  early_stopping_patience: 3
+  spoilage_weight_boost: 1.5        # extra class weight on spoilage classes
+
+thresholds:
+  default_t_conf: 0.55
+  default_t_spoil: 0.35
+  target_spoilage_recall: 0.85
+  max_uncertain_rate: 0.15          # share of usable photos allowed to be Uncertain
+
+export:
+  quantization: dynamic             # dynamic | int8 | float16 | none (see src/export_tflite.py)
+  representative_samples: 200       # only used for int8
+  max_model_mb: 10

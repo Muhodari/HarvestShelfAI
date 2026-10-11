@@ -1,0 +1,34 @@
+{
+  "_comment": "Expected brightness/sharpness from training/src/quality.py; app/test/image_quality_test.dart must match.",
+  "thresholds": {
+    "min_brightness": 40,
+    "max_brightness": 235,
+    "min_sharpness": 80
+  },
+  "cases": [
+    {
+      "file": "tomato_smooth.png",
+      "brightness": 150.625766,
+      "sharpness": 568.391052,
+      "failure": null
+    },
+    {
+      "file": "tomato_smooth_blurred.png",
+      "brightness": 150.673248,
+      "sharpness": 4.67653,
+      "failure": "blurry"
+    },
+    {
+      "file": "banana.png",
+      "brightness": 178.953803,
+      "sharpness": 1194.566812,
+      "failure": null
+    },
+    {
+      "file": "banana_blurred.png",
+      "brightness": 179.02014,
+      "sharpness": 16.329325,
+      "failure": "blurry"
+    }
+  ]
+}

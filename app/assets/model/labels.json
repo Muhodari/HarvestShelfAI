@@ -1,0 +1,56 @@
+[
+  {
+    "index": 0,
+    "id": "tomato_fresh",
+    "crop": "tomato",
+    "category": "fresh"
+  },
+  {
+    "index": 1,
+    "id": "tomato_sell_soon",
+    "crop": "tomato",
+    "category": "sell_soon"
+  },
+  {
+    "index": 2,
+    "id": "tomato_discount_today",
+    "crop": "tomato",
+    "category": "discount_today"
+  },
+  {
+    "index": 3,
+    "id": "tomato_spoilage_risk",
+    "crop": "tomato",
+    "category": "spoilage_risk"
+  },
+  {
+    "index": 4,
+    "id": "banana_fresh",
+    "crop": "banana",
+    "category": "fresh"
+  },
+  {
+    "index": 5,
+    "id": "banana_sell_soon",
+    "crop": "banana",
+    "category": "sell_soon"
+  },
+  {
+    "index": 6,
+    "id": "banana_discount_today",
+    "crop": "banana",
+    "category": "discount_today"
+  },
+  {
+    "index": 7,
+    "id": "banana_spoilage_risk",
+    "crop": "banana",
+    "category": "spoilage_risk"
+  },
+  {
+    "index": 8,
+    "id": "unusable",
+    "crop": "none",
+    "category": "uncertain"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {"id": 1, "crop": "tomato", "category": "fresh", "advice": "Good selling quality. Sell at the normal price."},
+  {"id": 2, "crop": "tomato", "category": "sell_soon", "advice": "Early signs of ripening or change. Put it at the front of the stall and sell it first."},
+  {"id": 3, "crop": "tomato", "category": "discount_today", "advice": "Clear decline. Lower the price and sell it today. Keep it out of direct sun."},
+  {"id": 4, "crop": "tomato", "category": "spoilage_risk", "advice": "Remove from normal sale. Keep it away from fresh tomatoes so it does not affect them."},
+  {"id": 5, "crop": "banana", "category": "fresh", "advice": "Good selling quality. Sell at the normal price."},
+  {"id": 6, "crop": "banana", "category": "sell_soon", "advice": "Early bruising or ripening. Sell this hand first."},
+  {"id": 7, "crop": "banana", "category": "discount_today", "advice": "Clear bruising or softening. Lower the price and sell it today."},
+  {"id": 8, "crop": "banana", "category": "spoilage_risk", "advice": "Remove from normal sale. Keep it away from fresh bananas; ripening produce can speed up ripening nearby."},
+  {"id": 9, "crop": "any", "category": "uncertain", "advice": "Retake the photo: one item, filling the frame, in daylight. If still unsure, check the produce by hand."}
+]

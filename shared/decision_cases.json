@@ -1,0 +1,63 @@
+{
+  "_comment": "Shared test vectors for the triage decision rule. Both training/src/decision.py and app/lib/services/decision_mapper.dart are tested against this file so the phone and the evaluation code can never disagree.",
+  "labels": [
+    {"index": 0, "id": "tomato_fresh", "crop": "tomato", "category": "fresh"},
+    {"index": 1, "id": "tomato_sell_soon", "crop": "tomato", "category": "sell_soon"},
+    {"index": 2, "id": "tomato_discount_today", "crop": "tomato", "category": "discount_today"},
+    {"index": 3, "id": "tomato_spoilage_risk", "crop": "tomato", "category": "spoilage_risk"},
+    {"index": 4, "id": "banana_fresh", "crop": "banana", "category": "fresh"},
+    {"index": 5, "id": "banana_sell_soon", "crop": "banana", "category": "sell_soon"},
+    {"index": 6, "id": "banana_discount_today", "crop": "banana", "category": "discount_today"},
+    {"index": 7, "id": "banana_spoilage_risk", "crop": "banana", "category": "spoilage_risk"},
+    {"index": 8, "id": "unusable", "crop": "none", "category": "uncertain"}
+  ],
+  "t_conf": 0.55,
+  "t_spoil": 0.35,
+  "cases": [
+    {
+      "name": "clear fresh tomato",
+      "probs": [0.90, 0.05, 0.02, 0.01, 0.01, 0.0, 0.0, 0.0, 0.01],
+      "expected": {"category": "fresh", "crop": "tomato", "confidence": 0.90, "reason": "model"}
+    },
+    {
+      "name": "unusable image wins",
+      "probs": [0.10, 0.0, 0.0, 0.0, 0.10, 0.0, 0.0, 0.0, 0.80],
+      "expected": {"category": "uncertain", "crop": null, "confidence": 0.80, "reason": "unsupported"}
+    },
+    {
+      "name": "low confidence, no spoilage signal",
+      "probs": [0.40, 0.30, 0.20, 0.05, 0.05, 0.0, 0.0, 0.0, 0.0],
+      "expected": {"category": "uncertain", "crop": "tomato", "confidence": 0.40, "reason": "low_confidence"}
+    },
+    {
+      "name": "spoilage override when spoilage is not top class",
+      "probs": [0.50, 0.10, 0.0, 0.38, 0.02, 0.0, 0.0, 0.0, 0.0],
+      "expected": {"category": "spoilage_risk", "crop": "tomato", "confidence": 0.38, "reason": "spoilage_override"}
+    },
+    {
+      "name": "spoilage is top class",
+      "probs": [0.0, 0.0, 0.0, 0.0, 0.05, 0.05, 0.10, 0.80, 0.0],
+      "expected": {"category": "spoilage_risk", "crop": "banana", "confidence": 0.80, "reason": "model"}
+    },
+    {
+      "name": "banana discount today",
+      "probs": [0.0, 0.0, 0.0, 0.0, 0.05, 0.15, 0.70, 0.10, 0.0],
+      "expected": {"category": "discount_today", "crop": "banana", "confidence": 0.70, "reason": "model"}
+    },
+    {
+      "name": "confidence exactly at threshold is accepted",
+      "probs": [0.0, 0.55, 0.11, 0.34, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "expected": {"category": "sell_soon", "crop": "tomato", "confidence": 0.55, "reason": "model"}
+    },
+    {
+      "name": "spoilage exactly at threshold triggers override",
+      "probs": [0.60, 0.05, 0.0, 0.35, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "expected": {"category": "spoilage_risk", "crop": "tomato", "confidence": 0.35, "reason": "spoilage_override"}
+    },
+    {
+      "name": "spoilage of the other crop is ignored",
+      "probs": [0.0, 0.0, 0.0, 0.40, 0.50, 0.05, 0.05, 0.0, 0.0],
+      "expected": {"category": "uncertain", "crop": "banana", "confidence": 0.50, "reason": "low_confidence"}
+    }
+  ]
+}

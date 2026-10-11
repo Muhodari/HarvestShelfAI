@@ -1,0 +1,25 @@
+# Research data (consent-covered; back up separately, never push publicly)
+data/raw/*
+data/processed/
+data/splits/
+!data/raw/.gitkeep
+evaluation/device_logs/*.csv
+evaluation/usability/*_scored.csv
+
+# Training
+training/.venv/
+training/.tfhub_cache/
+training/experiments/
+training/exports/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+training/sandbox/
+
+# Training logs
+training/*.log

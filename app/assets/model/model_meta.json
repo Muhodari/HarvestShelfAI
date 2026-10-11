@@ -1,0 +1,20 @@
+{
+  "model_version": "agrifreshnet_efficientnet_lite0",
+  "architecture": "efficientnet_lite0",
+  "input_size": 224,
+  "input_range": "0_255",
+  "num_classes": 9,
+  "t_conf": 0.2,
+  "t_spoil": 0.5,
+  "is_demo": false,
+  "notice": "INTERIM MODEL: trained on public Bangladesh photos (AgriFreshNET), not Rwandan markets. No Discount Today examples. For testing only.",
+  "quantization": "dynamic",
+  "quality": {
+    "max_brightness": 235,
+    "min_brightness": 40,
+    "min_sharpness": 80
+  },
+  "created_at": "2026-10-11T00:50:57+00:00",
+  "val_action_macro_f1": 0.8567733427528553,
+  "val_spoilage_recall": 0.9032258064516129
+}
