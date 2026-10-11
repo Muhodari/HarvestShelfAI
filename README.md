@@ -23,6 +23,7 @@ Built for sellers in **Nyabihu and Rusizi, Rwanda**. BSc Software Engineering pr
 
 ### Read more
 
+- 💻 **Source code:** [github.com/Muhodari/HarvestShelfAI](https://github.com/Muhodari/HarvestShelfAI)
 - 📓 **Project notebook:** [`training/notebooks/HarvestShelf_AI.ipynb`](training/notebooks/HarvestShelf_AI.ipynb). It is the main write-up, with results, graphs and how to reproduce them.
 - 📄 **Research proposal:** [`HarvestShelf_AI_Revised_Research_Proposal_Expanded_Evidence.docx`](HarvestShelf_AI_Revised_Research_Proposal_Expanded_Evidence.docx)
 
@@ -108,6 +109,13 @@ scripts/      copy_model_to_app.sh, build_release.sh, make_logo.py
 ```
 
 ## Getting started
+
+### Get the code
+
+```bash
+git clone https://github.com/Muhodari/HarvestShelfAI.git
+cd HarvestShelfAI
+```
 
 ### Requirements
 
