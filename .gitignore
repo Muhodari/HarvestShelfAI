@@ -24,3 +24,6 @@ training/*.log
 
 # Research proposal (kept local, not published)
 *Research_Proposal*.docx
+
+# Local test outputs (third-party photos, not published)
+test_results/
