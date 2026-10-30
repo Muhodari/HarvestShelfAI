@@ -36,10 +36,14 @@ def class_weights(y: np.ndarray, cfg: Config) -> dict[int, float]:
     return {i: float(w.get(i, 1.0)) for i in range(n)}
 
 
-def _fit(model, train_ds, val_ds, epochs, lr, weights, patience, log_path):
+def _fit(model, train_ds, val_ds, epochs, lr, weights, patience, log_path, label_smoothing=0.0, cosine=False):
+    if cosine:
+        # Decays from `lr` to 0 over the stage; early stopping may end it sooner.
+        lr = tf.keras.optimizers.schedules.CosineDecay(lr, decay_steps=max(1, epochs * len(train_ds)))
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(lr),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+        # Legacy Adam: same algorithm; the new one crashes the Apple-GPU (Metal) plugin when fine-tuning.
+        optimizer=tf.keras.optimizers.legacy.Adam(lr),
+        loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=label_smoothing),
         metrics=["accuracy"],
     )
     return model.fit(
@@ -73,21 +77,23 @@ def run(cfg: Config, arch: str, fold: int | None, head_epochs: int | None = None
     run_dir.mkdir(parents=True, exist_ok=False)
 
     model, base = build(arch, len(cfg.labels), cfg["image_size"], t["dropout"])
-    train_ds = make_dataset(train_df, cfg, training=True)
-    val_ds = make_dataset(val_df, cfg, training=False)
+    train_ds = make_dataset(train_df, cfg, training=True, one_hot=True)
+    val_ds = make_dataset(val_df, cfg, training=False, one_hot=True)
     weights = class_weights(y_train, cfg)
+    smoothing = t.get("label_smoothing", 0.0)
     log = run_dir / "history.csv"
 
     start = time.time()
     print(f"[{run_name}] stage 1: train head ({head_epochs} epochs), {len(train_df)} train / {len(val_df)} val")
-    _fit(model, train_ds, val_ds, head_epochs, t["head_lr"], weights, t["early_stopping_patience"], log)
+    _fit(model, train_ds, val_ds, head_epochs, t["head_lr"], weights, t["early_stopping_patience"], log, smoothing)
     if finetune_epochs > 0 and arch != "demo":
         print(f"[{run_name}] stage 2: fine-tune backbone ({finetune_epochs} epochs)")
         base.trainable = True
-        _fit(model, train_ds, val_ds, finetune_epochs, t["finetune_lr"], weights, t["early_stopping_patience"], log)
+        _fit(model, train_ds, val_ds, finetune_epochs, t["finetune_lr"], weights, t["early_stopping_patience"], log,
+             smoothing, cosine=True)
     train_seconds = time.time() - start
 
-    val_probs = model.predict(val_ds, verbose=0)
+    val_probs = model.predict(make_dataset(val_df, cfg, training=False), verbose=0)
     np.save(run_dir / "val_probs.npy", val_probs)
     np.save(run_dir / "val_true.npy", y_val)
     val_df[["image_id", "class_id"]].to_csv(run_dir / "val_ids.csv", index=False)

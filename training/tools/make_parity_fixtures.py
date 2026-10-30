@@ -51,6 +51,7 @@ def main() -> None:
     inp, out = interp.get_input_details()[0], interp.get_output_details()[0]
 
     test = pd.read_csv(cfg.path_of("splits_dir") / "test.csv")
+    test = test[test.file.notna() & (test.file != "")]  # generated mixed scenes have no camera original
     picked = test.groupby("class_id", group_keys=False).apply(
         lambda g: g.sample(min(a.per_class, len(g)), random_state=0))
 

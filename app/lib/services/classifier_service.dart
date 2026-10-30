@@ -6,9 +6,11 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import '../core/constants.dart';
 import '../models/model_meta.dart';
 import '../models/triage_result.dart';
+import 'image_classifier.dart';
 
-/// Runs the bundled TensorFlow Lite model on the phone (FR3).
-class ClassifierService {
+/// Runs the bundled TensorFlow Lite model on the phone (FR3), on a
+/// background isolate so the UI stays responsive.
+class ClassifierService implements ImageClassifier {
   ClassifierService._(this.meta, this._interpreter, this._isolate);
 
   final ModelMeta meta;
@@ -49,6 +51,7 @@ class ClassifierService {
     return ClassifierService._(meta, interpreter, isolate);
   }
 
+  @override
   Future<Prediction> classify(List<List<List<List<double>>>> input) async {
     final output = [List<double>.filled(meta.labels.length, 0)];
     final sw = Stopwatch()..start();

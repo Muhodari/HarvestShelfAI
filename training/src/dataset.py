@@ -50,20 +50,30 @@ def preprocess(img: tf.Tensor, image_size: int, training: bool) -> tf.Tensor:
         img = tf.image.rot90(img, k=tf.random.uniform([], 0, 4, dtype=tf.int32))
         img = tf.image.random_brightness(img, 0.15 * 255)
         img = tf.image.random_contrast(img, 0.8, 1.2)
+        # Small saturation change only: hue carries the ripeness signal, so it is never shifted.
+        img = tf.image.random_saturation(img, 0.85, 1.15)
         img = tf.clip_by_value(img, 0.0, 255.0)
+        # Phone-camera JPEG artefacts.
+        if tf.random.uniform([]) < 0.5:
+            img = tf.image.random_jpeg_quality(img / 255.0, 50, 95) * 255.0
+            img = tf.reshape(img, [image_size, image_size, 3])
     return img
 
 
-def make_dataset(df: pd.DataFrame, cfg: Config, training: bool, batch_size: int | None = None, seed: int = 0) -> tf.data.Dataset:
+def make_dataset(df: pd.DataFrame, cfg: Config, training: bool, batch_size: int | None = None, seed: int = 0,
+                 one_hot: bool = False) -> tf.data.Dataset:
+    """Batches of (image, label). one_hot=True gives one-hot labels (needed for label smoothing)."""
     base = cfg.path_of("processed_dir")
     paths = [str(base / p) for p in df.path]
     index = {c: i for i, c in enumerate(cfg.class_ids)}
     y = [index[c] for c in df.class_id]
     size = cfg["image_size"]
 
+    n_classes = len(cfg.class_ids)
+
     def load(path, label):
         img = tf.io.decode_jpeg(tf.io.read_file(path), channels=3)
-        return preprocess(img, size, training), label
+        return preprocess(img, size, training), (tf.one_hot(label, n_classes) if one_hot else label)
 
     ds = tf.data.Dataset.from_tensor_slices((paths, y))
     if training:

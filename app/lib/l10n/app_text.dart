@@ -108,6 +108,19 @@ class AppText {
   // ---- result ----------------------------------------------------------
   String get scanAnother => _t('Scan another', 'Suzuma ikindi');
   String get retake => _t('Retake photo', 'Ongera ufate ifoto');
+
+  // Shown when the photo is not a tomato or green banana (a bottle, another
+  // fruit, a hand, ...). The model cannot tell these apart, so the message
+  // covers all of them and says exactly what to photograph instead.
+  String get unsupportedTitle =>
+      _t('No vegetable or fruit found', 'Nta mboga cyangwa urubuto bibonetse');
+  String get unsupportedAdvice => _t(
+    'Take a new photo of a fruit or vegetable, close up, filling the frame, '
+        'in daylight.',
+    'Fata ifoto nshya y’urubuto cyangwa imboga, wegereye, cyuzuye ifoto, '
+        'ahari urumuri rw’umunsi.',
+  );
+  String get takeNewPhoto => _t('Take a new photo', 'Fata ifoto nshya');
   String get confidence => _t('Confidence', 'Icyizere');
   String get whatToDo => _t('What to do', 'Icyo wakora');
   String analysedIn(int ms) => _t(
@@ -155,8 +168,9 @@ class AppText {
       'Ifoto ntigaragara neza. Fata telefoni neza utanyeganyega.',
     ),
     'unsupported' => _t(
-      'This does not look like a tomato or green banana.',
-      "Ibi ntibisa n'inyanya cyangwa igitoki kibisi.",
+      'This photo does not show a fruit or vegetable, so it cannot be checked.',
+      'Iyi foto ntigaragaza urubuto cyangwa imboga, bityo ntishobora '
+          'gusuzumwa.',
     ),
     'low_confidence' => _t(
       'The app is not sure. Retake the photo closer, in good light.',

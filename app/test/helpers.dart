@@ -9,6 +9,7 @@ import 'package:harvestshelf/models/triage_result.dart';
 import 'package:harvestshelf/services/auth/auth_service.dart';
 import 'package:harvestshelf/services/auth/pin_hasher.dart';
 import 'package:harvestshelf/services/auth/session.dart';
+import 'package:harvestshelf/services/image_classifier.dart';
 import 'package:harvestshelf/services/image_quality_service.dart';
 import 'package:harvestshelf/services/preprocessing_service.dart';
 import 'package:harvestshelf/services/triage_service.dart';
@@ -98,7 +99,18 @@ Future<AppServices> testServices(
         quality: quality,
         thumbnailJpg: Uint8List(0),
       ),
-      classify: (_) async => Prediction(probabilities: probs, inferenceMs: 42),
+      classifier: FixedClassifier(probs),
     ),
   );
+}
+
+/// Test double for the model: always returns the same probabilities.
+class FixedClassifier implements ImageClassifier {
+  FixedClassifier(this.probabilities);
+
+  final List<double> probabilities;
+
+  @override
+  Future<Prediction> classify(List<List<List<List<double>>>> input) async =>
+      Prediction(probabilities: probabilities, inferenceMs: 42);
 }

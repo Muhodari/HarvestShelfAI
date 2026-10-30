@@ -3,7 +3,10 @@
     python -m src.thresholds --run experiments/<run>
 
 Searches a grid for the pair that maximises action macro-F1 while keeping
-spoilage recall >= target and the Uncertain rate <= max. Writes
+spoilage recall >= target, the Uncertain rate <= max, and at least
+`min_unusable_rejection` of unusable / non-crop photos shown as Uncertain
+(so a bottle is never given a freshness verdict). t_conf never goes below
+`min_t_conf`. Writes
 thresholds.json and a risk-coverage plot into the run folder. Never tune
 on the test set.
 """
@@ -20,26 +23,33 @@ from .config import Config
 from .metrics import summarize
 
 
-def search(y_true, probs, labels, target_recall: float, max_uncertain: float, step: float = 0.05) -> dict:
-    grid = np.round(np.arange(0.20, 0.951, step), 3)
+def search(y_true, probs, labels, target_recall: float, max_uncertain: float, step: float = 0.05,
+           min_rejection: float = 0.0, min_t_conf: float = 0.20) -> dict:
+    t_conf_grid = np.round(np.arange(min_t_conf, 0.951, step), 3)
+    t_spoil_grid = np.round(np.arange(0.20, 0.951, step), 3)
     rows = []
-    for t_conf in grid:
-        for t_spoil in grid:
+    for t_conf in t_conf_grid:
+        for t_spoil in t_spoil_grid:
             m = summarize(y_true, probs, labels, float(t_conf), float(t_spoil))
             rows.append({
                 "t_conf": float(t_conf), "t_spoil": float(t_spoil),
                 "f1": m.get("action_macro_f1") or 0.0,
                 "recall": m.get("spoilage_recall"),
                 "uncertain": m.get("uncertain_rate") or 0.0,
+                "rejected": m.get("unusable_rejected_rate"),
             })
 
-    ok = [r for r in rows if r["recall"] is not None and r["recall"] >= target_recall and r["uncertain"] <= max_uncertain]
+    def rejects(r):
+        return r["rejected"] is None or r["rejected"] >= min_rejection
+
+    ok = [r for r in rows if r["recall"] is not None and r["recall"] >= target_recall
+          and r["uncertain"] <= max_uncertain and rejects(r)]
     if ok:
         best = max(ok, key=lambda r: (r["f1"], -r["uncertain"]))
         best["constraints_met"] = True
     else:
-        # Fall back to the safest choice: highest spoilage recall, then F1.
-        best = max(rows, key=lambda r: ((r["recall"] or 0.0), r["f1"]))
+        # Fall back to the safest choice: reject non-crops, then highest spoilage recall, then F1.
+        best = max(rows, key=lambda r: (rejects(r), (r["recall"] or 0.0), r["f1"]))
         best["constraints_met"] = False
     best["grid"] = rows
     return best
@@ -74,7 +84,8 @@ def run(cfg: Config, run_dir: Path) -> dict:
     probs = np.load(run_dir / "val_probs.npy")
     y = np.load(run_dir / "val_true.npy")
     th = cfg["thresholds"]
-    best = search(y, probs, cfg.labels, th["target_spoilage_recall"], th["max_uncertain_rate"])
+    best = search(y, probs, cfg.labels, th["target_spoilage_recall"], th["max_uncertain_rate"],
+                  min_rejection=th.get("min_unusable_rejection", 0.0), min_t_conf=th.get("min_t_conf", 0.20))
     grid = best.pop("grid")
     final = summarize(y, probs, cfg.labels, best["t_conf"], best["t_spoil"])
     out = {"t_conf": best["t_conf"], "t_spoil": best["t_spoil"], "constraints_met": best["constraints_met"],
@@ -85,7 +96,7 @@ def run(cfg: Config, run_dir: Path) -> dict:
 
     print(f"t_conf={best['t_conf']}  t_spoil={best['t_spoil']}  constraints met: {best['constraints_met']}")
     print(f"val action macro-F1={final.get('action_macro_f1')}  spoilage recall={final.get('spoilage_recall')}  "
-          f"uncertain rate={final.get('uncertain_rate')}")
+          f"uncertain rate={final.get('uncertain_rate')}  unusable rejected={final.get('unusable_rejected_rate')}")
     if not best["constraints_met"]:
         print("WARNING: no threshold pair meets both constraints; the model needs more or better data.")
     return out

@@ -20,6 +20,9 @@ class ResultScreen extends StatelessWidget {
     final r = outcome.result;
     final color = categoryColor(r.category);
     final isUncertain = r.category == TriageCategory.uncertain;
+    // Not a tomato or green banana (bottle, other produce, ...): say so
+    // plainly instead of the generic "Uncertain".
+    final isUnsupported = r.reason == DecisionReason.unsupported;
     // The bar only makes sense for a direct model answer: for a spoilage
     // override it would show a low number next to a warning, and for an
     // unsupported photo it is confidence that the photo is NOT produce.
@@ -73,7 +76,9 @@ class ResultScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    t.category(r.category),
+                                    isUnsupported
+                                        ? t.unsupportedTitle
+                                        : t.category(r.category),
                                     style: text.headlineSmall!.copyWith(
                                       color: color,
                                     ),
@@ -101,7 +106,7 @@ class ResultScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (outcome.rule != null) ...[
+                  if (outcome.rule != null || isUnsupported) ...[
                     const SizedBox(height: 12),
                     Card(
                       child: Padding(
@@ -121,10 +126,12 @@ class ResultScreen extends StatelessWidget {
                                   Text(t.whatToDo, style: text.titleMedium),
                                   const SizedBox(height: 4),
                                   Text(
-                                    t.advice(
-                                      outcome.rule!.id,
-                                      outcome.rule!.advice,
-                                    ),
+                                    isUnsupported
+                                        ? t.unsupportedAdvice
+                                        : t.advice(
+                                            outcome.rule!.id,
+                                            outcome.rule!.advice,
+                                          ),
                                     style: text.bodyLarge,
                                   ),
                                 ],
@@ -149,7 +156,10 @@ class ResultScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
-              child: _Actions(isUncertain: isUncertain),
+              child: _Actions(
+                isUncertain: isUncertain,
+                isUnsupported: isUnsupported,
+              ),
             ),
           ],
         ),
@@ -161,9 +171,10 @@ class ResultScreen extends StatelessWidget {
 /// Done / Scan again. Side by side normally; stacked when the text is
 /// large or the screen is narrow, so labels never get cut off.
 class _Actions extends StatelessWidget {
-  const _Actions({required this.isUncertain});
+  const _Actions({required this.isUncertain, required this.isUnsupported});
 
   final bool isUncertain;
+  final bool isUnsupported;
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +187,11 @@ class _Actions extends StatelessWidget {
       icon: Icon(
         isUncertain ? Icons.refresh_rounded : Icons.photo_camera_rounded,
       ),
-      label: Text(isUncertain ? t.retake : t.scanAnother),
+      label: Text(
+        isUnsupported
+            ? t.takeNewPhoto
+            : (isUncertain ? t.retake : t.scanAnother),
+      ),
       onPressed: () => Navigator.of(context).pop(ImageSource.camera),
     );
     return LayoutBuilder(

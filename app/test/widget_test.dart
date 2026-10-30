@@ -112,4 +112,36 @@ void main() {
     expect(find.textContaining('Confidence'), findsNothing);
     expect(find.text(AppText.en.retake), findsOneWidget);
   });
+
+  testWidgets('a bottle or other non-crop photo gets a clear message', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ResultScreen(
+          outcome: outcome(
+            const TriageResult(
+              category: TriageCategory.uncertain,
+              crop: null,
+              confidence: 0.93,
+              reason: DecisionReason.unsupported,
+              inferenceMs: 120,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text(AppText.en.unsupportedTitle), findsOneWidget);
+    expect(find.text('Uncertain'), findsNothing);
+    expect(
+      find.textContaining('does not show a fruit or vegetable'),
+      findsOneWidget,
+    );
+    expect(find.text(AppText.en.unsupportedAdvice), findsOneWidget);
+    expect(find.text(AppText.en.takeNewPhoto), findsOneWidget);
+    expect(
+      find.textContaining('Confidence'),
+      findsNothing,
+    ); // 93% sure it is NOT produce
+  });
 }

@@ -6,10 +6,9 @@ import '../models/model_meta.dart';
 import '../models/scan.dart';
 import '../models/triage_result.dart';
 import 'decision_mapper.dart';
+import 'image_classifier.dart';
 import 'preprocessing_service.dart';
 
-typedef ClassifyFn =
-    Future<Prediction> Function(List<List<List<List<double>>>> input);
 typedef PrepareFn =
     Future<PreparedImage> Function(Uint8List bytes, int inputSize);
 typedef SaveThumbnailFn = Future<String?> Function(Uint8List jpg);
@@ -29,7 +28,7 @@ class TriageOutcome {
 class TriageService {
   TriageService({
     required this.meta,
-    required this.classify,
+    required this.classifier,
     required this.scans,
     required this.guidance,
     this.prepare = prepareImage,
@@ -39,7 +38,7 @@ class TriageService {
        _clock = clock ?? DateTime.now;
 
   final ModelMeta meta;
-  final ClassifyFn classify;
+  final ImageClassifier classifier;
   final PrepareFn prepare;
   final ScanRepository scans;
   final GuidanceRepository guidance;
@@ -67,7 +66,7 @@ class TriageService {
         reason: failure,
       );
     } else {
-      final prediction = await classify(prepared.input);
+      final prediction = await classifier.classify(prepared.input);
       result = _mapper
           .map(prediction.probabilities)
           .withInferenceMs(prediction.inferenceMs);

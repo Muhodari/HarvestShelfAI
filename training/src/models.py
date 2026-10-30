@@ -4,9 +4,14 @@ so the phone always sends the same input whichever model wins."""
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import tensorflow as tf
+
+# Keep TF Hub downloads in the project: macOS clears the default temp-folder cache,
+# which leaves a broken half-deleted module behind.
+os.environ.setdefault("TFHUB_CACHE_DIR", str(Path(__file__).resolve().parent.parent / ".tfhub_cache"))
 
 HUB_EFFICIENTNET_LITE0 = "https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/2"
 
@@ -38,7 +43,8 @@ def _hub_layer_class():
                 if dep.name == "variables":
                     for v in dep.ref:
                         if id(v) not in seen:
-                            self._add_existing_weight(v, trainable=True)
+                            # BatchNorm running statistics have no gradient: keep them non-trainable.
+                            self._add_existing_weight(v, trainable="moving_" not in v.name)
                             seen.add(id(v))
             for v in getattr(self._func, "variables", []):
                 if id(v) not in seen:

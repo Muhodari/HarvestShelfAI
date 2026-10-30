@@ -19,7 +19,9 @@
 3. [Setting up the environment and the project](#3-setting-up-the-environment-and-the-project)
 4. [Designs](#4-designs)
 5. [Deployment plan](#5-deployment-plan)
-6. [Technical details](#6-technical-details)
+6. [Scope alignment and feature validation](#6-scope-alignment-and-feature-validation)
+7. [Architecture](#7-architecture)
+8. [Technical details](#8-technical-details)
 
 ---
 
@@ -35,6 +37,8 @@ Small produce sellers in Rwanda lose income when tomatoes and green bananas spoi
 | **Spoilage Risk** | Remove from sale; keep it away from fresh produce |
 | **Uncertain** | Photo too dark or blurry, model unsure, or not a supported crop: retake the photo |
 
+**Bananas** follow one ripeness scale for green cooking bananas: **green** is Fresh, **yellow** is Sell Soon, **spotted** is Discount Today, and **black or rotten** is Spoilage Risk. If a photo holds several items, the answer is for the **worst** one: one rotten banana in a bunch gives Spoilage Risk.
+
 Built for sellers in **Nyabihu and Rusizi, Rwanda**. BSc Software Engineering project by **Sage Muhodari**.
 
 | | |
@@ -43,7 +47,7 @@ Built for sellers in **Nyabihu and Rusizi, Rwanda**. BSc Software Engineering pr
 | **Platform** | Android phone, Flutter app |
 | **Internet** | Not needed: the model runs on the phone, and the release build has no INTERNET permission |
 | **Languages** | English and Kinyarwanda |
-| **Model** | EfficientNet-Lite0, TensorFlow Lite, 3.7 MB |
+| **Model** | EfficientNet-Lite0, TensorFlow Lite, 3.6 MB, trained on about 23,000 public photos from 6 datasets |
 | **Accounts** | Stored on the phone only, with PIN login (Researcher and Seller roles) |
 | **Training** | Python / TensorFlow pipeline, with a browser portal for uploading photos and retraining |
 
@@ -82,6 +86,8 @@ scripts/      copy_model_to_app.sh, build_release.sh, make_logo.py
 | **Training** | Python **3.11**: `cd training && python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt` | `make test PY=.venv/bin/python` |
 | **Training in Docker** | `docker build -t harvestshelf-train:2.15 training/`, then `docker run --rm -it -v "$PWD":/workspace -w /workspace/training harvestshelf-train:2.15` | `python -m pytest -q tests` |
 | **Public dataset** | `cd training && make data-public` downloads AgriFreshNET (348 MB, CC BY 4.0) | |
+| **Large dataset** | `make data-large PY=.venv/bin/python` downloads 5 more public datasets (about 3 GB after unpacking). Needs a free Kaggle account: save your API key as `~/.kaggle/kaggle.json` | |
+| **Apple Silicon GPU** (optional) | `.venv/bin/pip install tensorflow-metal==1.1.0` trains about 3× faster on M-series Macs | |
 | **Notebook kernel** | `.venv/bin/python -m ipykernel install --sys-prefix --name harvestshelf` | open the notebook |
 | **CI** | `.github/workflows/ci.yml` runs the app tests, the Python tests and a smoke test on every push | |
 
@@ -99,7 +105,8 @@ flutter run                                                    # on a connected 
 
 ```bash
 cd training
-make public PY=.venv/bin/python     # public data → train all candidates → install the best in the app
+make large PY=.venv/bin/python      # all 6 public datasets + mixed scenes → train → test → install in the app (about 1 hour on an M3 GPU)
+make public PY=.venv/bin/python     # AgriFreshNET only: train all candidate models and compare them
 ```
 
 ### Training portal (optional)
@@ -150,6 +157,8 @@ All five result types share the same layout: the photo, the action with its conf
 
 <img src="docs/screenshots/result_screens.png" alt="Result screens: Fresh, Uncertain, Spoilage Risk" width="900">
 
+> **Note:** these screenshots were taken with the earlier model (October 2026). That model called yellow bananas Fresh; the current one calls them Sell Soon.
+
 ## 5. Deployment plan
 
 The app is deployed **directly onto phones as an APK**, not through the Play Store, because it is a research tool used in a supervised field study and needs no internet.
@@ -165,32 +174,128 @@ The app is deployed **directly onto phones as an APK**, not through the Play Sto
 | **7. Collect results** | The researcher exports the scan log as CSV (anonymous user IDs, inference time per scan) and compares it with the targets. | Profile → Export |
 | **8. Update** | New field photos go back into the portal, the model is retrained, and a new APK is installed over the old one. Existing scans and accounts are kept. | steps 2–5 again |
 
-**Before the field study:** the Kinyarwanda text must be reviewed by a native speaker, and the interim model (trained on public photos from Bangladesh) should be replaced by one trained on Rwandan market photos.
+**Before the field study:** the Kinyarwanda text must be reviewed by a native speaker, and the model should be fine-tuned on Rwandan market photos collected with the training portal (the current model has seen public photos only).
 
-## 6. Technical details
+## 6. Scope alignment and feature validation
+
+This section compares the finished project with the approved proposal. Requirement IDs (FR = functional, NFR = non-functional) are the ones cited in code comments next to the code that implements them.
+
+### Feature status
+
+| Planned feature | Intended purpose | Current status | Evidence |
+|---|---|---|---|
+| **FR1** Take or choose a photo | Let a seller check produce with the phone they already have | **Completed** | Camera and gallery buttons on the Scan tab ([`scan_screen.dart`](app/lib/screens/scan_screen.dart)); screenshot [`scan_tab.png`](docs/screenshots/scan_tab.png) |
+| **FR2** Photo quality check | Reject dark, overexposed or blurred photos before they give a wrong answer | **Completed** | [`image_quality_service.dart`](app/lib/services/image_quality_service.dart); same results in Dart and Python ([`shared/quality_cases.json`](shared/quality_cases.json), `image_quality_test.dart`) |
+| **FR3** On-device AI model | Classify the produce on the phone, with no internet | **Completed** | [`classifier_service.dart`](app/lib/services/classifier_service.dart); 3.6 MB TFLite model in [`app/assets/model/`](app/assets/model/); phone and Python give the same answer on 24 of 24 test photos (`integration_test/parity_test.dart`) |
+| **FR4** One action with confidence and advice | Tell the seller what to do: Fresh, Sell Soon, Discount Today, Spoilage Risk or Uncertain | **Completed** | [`decision_mapper.dart`](app/lib/services/decision_mapper.dart), [`result_screen.dart`](app/lib/screens/result_screen.dart), [`guidance_rules.json`](app/assets/guidance_rules.json); screenshots in [Designs](#screenshots-of-the-app) |
+| **FR5** Scan history | Let sellers look back at earlier results | **Completed** | [`history_screen.dart`](app/lib/screens/history_screen.dart), [`repositories.dart`](app/lib/data/repositories.dart); each seller sees only their own scans (`data_test.dart`) |
+| **FR6** Anonymous test-log export | Give the researcher data to measure the app in the field study | **Completed** | [`export_service.dart`](app/lib/services/export_service.dart): CSV with an anonymous user ID, no names or photos (`data_test.dart`) |
+| **Model accuracy** (Objective 3): macro-F1 ≥ 0.80, Spoilage Risk recall ≥ 0.85, model < 10 MB | Make sure the advice is reliable enough to act on | **Partial**: met on public test data (F1 0.92, recall 0.96, 3.6 MB); not yet measured in Rwandan markets | [Current status](#current-status); `training/sandbox/large/work/experiments/large_efficientnet_lite0/test_metrics.json` |
+| **Model comparison** (Section 3.4.5) | Choose the best model for low-cost phones in a fair test | **Partial**: all six models compared on AgriFreshNET; only EfficientNet-Lite0 retrained on the large dataset | [Project notebook](training/notebooks/HarvestShelf_AI.ipynb); [`src/compare.py`](training/src/compare.py) |
+| **Rwandan field photo dataset** | Train and test on the produce, light and markets sellers really have | **Partial**: photos collected at **Kimironko market (Kigali)**; not yet labelled, uploaded or used to train or test the model | Upload, labelling and retraining tool ready: [training portal](#training-portal-add-photos-and-retrain). The photos are not in this repository (`data/` is kept out of git) |
+| **Labeller agreement check** (Cohen's kappa ≥ 0.70) | Make sure field labels are consistent before training on them | **Not implemented**: needs a second person to label the Kimironko photos | The check is built into [`clean.py`](training/src/clean.py) (`labeling.min_kappa` in [`config.yaml`](training/config.yaml)); the portal's Photos tab takes a second label |
+| **Field study** in Nyabihu and Rusizi | Measure the app with real sellers | **Not implemented** | Planned in the [Deployment plan](#5-deployment-plan); the export it needs (FR6) is ready |
+| **Figma mockups** | Design the screens before building them | **Not implemented** | Placeholder in [Designs](#figma-mockups); the built screens are shown in [screenshots](#screenshots-of-the-app) |
+| **NFR1** Works offline | Markets often have poor or costly internet | **Completed** | No INTERNET permission in [`AndroidManifest.xml`](app/android/app/src/main/AndroidManifest.xml); [`build_release.sh`](scripts/build_release.sh) fails the build if one appears; release APK checked on 30 Oct 2026 |
+| **NFR5** Privacy | Keep sellers' photos and data on their own phone | **Completed** | No phone or storage permissions; data in local SQLite; PINs hashed with PBKDF2 ([`pin_hasher.dart`](app/lib/services/auth/pin_hasher.dart)) |
+| **NFR6** Explainable, cautious decisions | Never give a confident answer the model is unsure of | **Completed** | Decision rule with tuned thresholds ([How a scan works](#how-a-scan-works)); Python and Dart rules tested on the same cases ([`shared/decision_cases.json`](shared/decision_cases.json)) |
+| **Fast scans** (< 1 s on a 3–4 GB phone) | Keep the queue moving at the stall | **Partial**: median 124 ms on a Pixel 8 emulator; not yet timed on a real low-cost phone | `PARITY SUMMARY median_ms=124` from `parity_test.dart`; the field export records `inference_ms` per scan |
+| **Small app** (< 50 MB) | Fit on low-storage phones and share easily | **Completed**: 14–15 MB per APK | `flutter build apk --release --split-per-abi` (30 Oct 2026) |
+| **Release-ready APK** | Install a trustworthy, updatable build on study phones | **Partial**: the release build is still signed with the debug key | `signingConfig = signingConfigs.getByName("debug")` in [`build.gradle.kts`](app/android/app/build.gradle.kts) |
+| **English and Kinyarwanda** | Sellers can use the app in their own language | **Partial**: both languages built in; Kinyarwanda not yet checked by a native speaker | [`app_text.dart`](app/lib/l10n/app_text.dart); language switch on the Welcome screen |
+
+### Scope changes and why
+
+| Change | Type | Reason |
+|---|---|---|
+| Trained on six **public datasets** instead of Rwandan field photos | Change | The Kimironko photos are not labelled yet. Public data gives a working model now; it will be fine-tuned on the Kimironko photos with the training portal. |
+| First field photos from **Kimironko market (Kigali)** | Change | Photos were collected in Kimironko rather than in Nyabihu or Rusizi. The field study is still planned in Nyabihu and Rusizi. |
+| **EfficientNetV2-B0** instead of MobileNetV2 as a candidate model | Change | A newer model of similar size gives a fairer modern comparison ([`models.py`](training/src/models.py)). |
+| **Local accounts** with Researcher and Seller roles | Added | Several sellers can share one study phone and each sees only their own history; still offline. |
+| **Training portal** (browser tool) | Added | Lets the research team upload and label field photos and retrain without the command line. |
+| **"Not produce" rejection and mixed-photo handling** | Added | Testing showed bottles and multi-item photos got wrong answers. The model now learns from non-produce images and multi-item scenes, and shows "No vegetable or fruit found" for non-produce. |
+| **Green-banana ripeness scale** | Clarified | Yellow bananas are already ripening for a seller of green cooking bananas, so yellow is Sell Soon, not Fresh. |
+| **iOS build** | Added | For testing on the iOS simulator. Android remains the target platform. |
+| **Tomato Discount Today** answers | Limited | No public dataset has examples of it. It must come from field photos. |
+
+### Still to do
+
+1. **Label the Kimironko photos** with two people, upload them through the [training portal](#training-portal-add-photos-and-retrain), and check agreement (kappa ≥ 0.70).
+2. **Fine-tune and re-test the model on them,** including the first tomato **Discount Today** examples, which no public dataset has.
+3. **Time the app on a real low-cost phone** (3–4 GB RAM) and test the camera there.
+4. **Have a native speaker review** the Kinyarwanda text.
+5. **Sign the release APK** with a project key instead of the debug key.
+6. **Add the Figma mockups** and **retake the screenshots** with the current model.
+7. **Update the project notebook** with the large-dataset results, and retrain the other candidate models on the large dataset for a full comparison.
+8. **Run the field study** in Nyabihu and Rusizi.
+
+## 7. Architecture
+
+Both halves of the project are split into small modules, each with one job. Dependencies point inwards (screens → services → data → models), and every service gets what it needs through its constructor, so it can be tested on its own.
+
+```
+app/lib/
+  models/      plain data classes (Scan, TriageResult, ModelMeta, AppUser)
+  data/        SQLite database and repositories: the only code that writes SQL
+  services/    the scan pipeline: preprocessing, quality check, classifier, decision rule, triage; auth/ for accounts
+  screens/     one file per screen; no business logic
+  widgets/     reusable UI pieces, grouped by purpose (scan, layout, forms, users, brand)
+  l10n/        all user-facing text, English and Kinyarwanda side by side
+  core/        theme, asset paths, time formats
+  app_services.dart   composition root: builds every service once at start-up
+
+training/
+  src/         one module per pipeline step: clean → split → train → thresholds → evaluate → export
+  tools/large/ the large-dataset experiment: sources.py, dedupe.py, scenes.py
+  portal/      the browser training portal (Flask)
+  tests/       50 unit tests
+```
+
+## 8. Technical details
 
 ### Current status
 
-*Last updated: 11 Oct 2026*
+*Last updated: 30 Oct 2026*
 
-The app ships with an **interim model**. It was trained on the public **AgriFreshNET** dataset (CC BY 4.0, photos from Bangladesh).
+The app ships with a model trained on **six public datasets**: 23,024 photos after cleaning, plus 5,400 generated mixed scenes. **Field photos have been collected at Kimironko market (Kigali) but are not labelled or used in training yet.**
 
-- **No Rwandan field photos have been collected yet.**
-- There are **no Discount Today examples** in the public data.
-- Its bananas are mostly yellow dessert bananas photographed alone on a white cloth.
+| Dataset | Licence | What it adds |
+|---|---|---|
+| [AgriFreshNET](https://doi.org/10.17632/42m5tb7yv9.1) | CC BY 4.0 | tomatoes and bananas at three freshness stages; other crops as "not supported" |
+| [Banana Ripeness Classification](https://www.kaggle.com/datasets/shahriar26s/banana-ripeness-classification-dataset) | see Kaggle page | **green** bananas, and the only Discount Today examples (overripe) |
+| [Fresh and Stale Fruits and Vegetables](https://www.kaggle.com/datasets/raghavrpotdar/fresh-and-stale-images-of-fruits-and-vegetables) | see Kaggle page | fresh/stale tomatoes, yellow and stale bananas, other produce |
+| [Fruit and Vegetable Disease (Healthy vs Rotten)](https://www.kaggle.com/datasets/muhammad0subhan/fruit-and-vegetable-disease-healthy-vs-rotten) | CC0 | healthy/rotten tomatoes, rotten bananas, 9 other crops |
+| [Garbage Classification](https://www.kaggle.com/datasets/asdasdasasdas/garbage-classification) | see Kaggle page | bottles, cans, glass, paper: things that are not produce |
+| [Imagenette](https://github.com/fastai/imagenette) | ImageNet subset, research use | everyday objects and scenes |
 
-Test results on held-out capture sessions:
+How the data is prepared ([`tools/large_experiment.py`](training/tools/large_experiment.py)):
 
-| Model | Macro-F1 | Spoilage recall | Phone size | Role |
-|---|:-:|:-:|:-:|---|
-| **EfficientNet-Lite0** | 0.822 | 0.957 | 3.7 MB | **in the app** |
-| EfficientNetV2-B0 | 0.829 | 0.971 | 11.8 MB | just over the 10 MB limit |
-| ResNet50 | 0.840 | 0.957 | 24.0 MB | accuracy reference |
-| MobileNetV3-Small | 0.822 | 0.957 | 1.9 MB | baseline only |
-| Random Forest / SVM | 0.640 / 0.532 | 0.886 / 0.929 | n/a | classical baselines |
-| ***Target*** | ***≥ 0.80*** | ***≥ 0.85*** | ***< 10 MB*** | |
+- **Duplicates are removed or kept together.** Exact copies are dropped. Near-identical photos (resized or re-encoded copies, video frames) are found with image hashing and kept in the same group, so a photo and its copy never end up on both sides of the train/test split.
+- **Mixed scenes are generated.** Collages of 2–6 items on varied backgrounds are labelled by the worst item. Test scenes are built only from test photos.
+- **Things that are not produce are in the training data,** so bottles, cans and other objects are answered with Uncertain.
+- **Thresholds are chosen on the validation set** with an extra rule: at least 95% of "not supported" photos must be shown as Uncertain.
 
-**Next step:** collect market photos in Rwanda with the [training portal](#training-portal-add-photos-and-retrain), then retrain on them.
+Test results on held-out photos (4,307 photos and scenes the model never saw):
+
+| | Macro-F1 | Spoilage recall | Not-supported rejected |
+|---|:-:|:-:|:-:|
+| **Single photos** (3,607) | **0.957** | **0.973** | 0.930 |
+| Mixed scenes (700) | 0.718 | 0.868 | 0.960 |
+| **All test images** | **0.923** | **0.956** | 0.935 |
+| Previous model (AgriFreshNET only, its own test set) | 0.822 | 0.957 | n/a |
+| ***Target*** | ***≥ 0.80*** | ***≥ 0.85*** | |
+
+Per action on the whole test set: Fresh F1 0.94, Sell Soon 0.90, Discount Today 0.88, Spoilage Risk 0.96. Bottles, cans and everyday objects in the test set were **all** rejected. On the phone (Pixel 8 emulator) the app gives the same answer as Python on all 24 check photos; the median scan takes 124 ms. Model size: 3.6 MB.
+
+**Known limits**
+
+- **Tomato Sell Soon** has only 287 photos (all from AgriFreshNET), and there are **no tomato Discount Today photos** in any public dataset. These are the weakest tomato answers.
+- **Mixed scenes** are harder than single photos (F1 0.72). The app still asks for one item per photo.
+- **A photo of several plastic bottles** can still be called Spoilage Risk; a single bottle is rejected.
+- **The Fresh and Stale test score (0.99) is probably too high.** That dataset is built from video frames, so some near-identical frames may sit in both training and test.
+- **The model has not been trained or tested on Rwandan market photos yet.** The Kimironko photos still need labelling; accuracy in Nyabihu and Rusizi must be measured in the field study.
+
+**Next step:** label the Kimironko photos, upload them with the [training portal](#training-portal-add-photos-and-retrain), then fine-tune and re-test on them.
 
 ### Project notebook
 
@@ -203,7 +308,7 @@ Test results on held-out capture sessions:
 - a live run of the model that is in the app
 - on-device results, limitations, and how to reproduce everything
 
-It is saved with its outputs, so you can **read it without running anything**. To run it again:
+It is saved with its outputs, so you can **read it without running anything**. It documents the first model (AgriFreshNET only) and the comparison of model types; the current model's results are in [Current status](#current-status) and in `training/sandbox/large/work/experiments/large_efficientnet_lite0/`. To run it again:
 
 ```bash
 cd training && .venv/bin/jupyter lab notebooks/HarvestShelf_AI.ipynb   # kernel: "HarvestShelf (training/.venv)"
@@ -278,7 +383,7 @@ Accounts are stored only on the phone (SQLite), so the app still needs no intern
 | Inference < 1 s on a 3–4 GB phone | `inference_ms` in the app's exported test log |
 | App < 50 MB, model < 10 MB | `build_release.sh`, `export_report.json` |
 
-Requirements FR1–FR6 and NFR1–NFR6 are cited in comments next to the code that implements them.
+Requirements FR1–FR6, NFR1, NFR5 and NFR6 are cited in comments next to the code that implements them.
 
 ### Logo and font
 

@@ -84,7 +84,7 @@ class AppServices {
       language: language,
       triage: TriageService(
         meta: meta,
-        classify: classifier.classify,
+        classifier: classifier,
         scans: scans,
         guidance: guidance,
         saveThumbnail: saveThumbnail,
