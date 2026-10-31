@@ -22,11 +22,13 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Formatting
+        run: dart format --output=none --set-exit-if-changed lib test integration_test
       - run: flutter analyze
       - run: flutter test
 
   training:
-    name: Python pipeline (unit tests + smoke test)
+    name: Python pipeline (lint + unit tests + smoke test)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,6 +41,8 @@ jobs:
           cache: pip
           cache-dependency-path: training/requirements.txt
       - run: pip install -r requirements.txt
+      - name: Lint (settings in training/ruff.toml)
+        run: ruff check .
       - run: python -m pytest -q tests
       - name: Whole pipeline on generated images
         run: python -m tools.smoke_test

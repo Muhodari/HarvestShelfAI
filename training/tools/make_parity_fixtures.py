@@ -16,6 +16,8 @@ import argparse
 import base64
 import io
 import json
+import shutil
+import subprocess
 
 import numpy as np
 import pandas as pd
@@ -105,6 +107,8 @@ def main() -> None:
     dst = APP / "integration_test" / "parity_fixtures.dart"
     dst.parent.mkdir(exist_ok=True)
     dst.write_text("\n".join(lines) + "\n")
+    if shutil.which("dart"):  # keep the generated file in the repo's Dart style
+        subprocess.run(["dart", "format", str(dst)], check=False, capture_output=True)
     print(f"wrote {len(entries)} fixtures -> {dst} ({dst.stat().st_size / 1e6:.1f} MB)")
     print(pd.DataFrame(entries)[["id", "format", "true", "category", "reason"]].to_string(index=False))
 

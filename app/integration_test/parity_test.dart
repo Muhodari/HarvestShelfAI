@@ -31,8 +31,11 @@ void main() {
 
   testWidgets('phone matches Python on test photos', (tester) async {
     final meta = await ClassifierService.loadMeta(rootBundle);
-    expect(meta.modelVersion, parityModelVersion,
-        reason: 'regenerate parity_fixtures.dart for the bundled model');
+    expect(
+      meta.modelVersion,
+      parityModelVersion,
+      reason: 'regenerate parity_fixtures.dart for the bundled model',
+    );
     final classifier = await ClassifierService.load(meta);
     final mapper = DecisionMapper(meta);
 
@@ -55,14 +58,18 @@ void main() {
       final got = mapper.map(pred.probabilities);
       if (got.category.id != f['category']) mismatches.add('${f['id']} ($fmt)');
       // ignore: avoid_print
-      print('PARITY [$fmt] ${f['id']} true=${f['true']} python=${f['category']} '
-          'phone=${got.category.id} diff=${diff.toStringAsFixed(4)} ${pred.inferenceMs} ms');
+      print(
+        'PARITY [$fmt] ${f['id']} true=${f['true']} python=${f['category']} '
+        'phone=${got.category.id} diff=${diff.toStringAsFixed(4)} ${pred.inferenceMs} ms',
+      );
     }
     times.sort();
     // ignore: avoid_print
-    print('PARITY SUMMARY fixtures=${parityFixtures.length} mismatched_actions=${mismatches.length} '
-        'max_diff_png=${maxDiff['png']!.toStringAsFixed(4)} max_diff_jpg=${maxDiff['jpg']!.toStringAsFixed(4)} '
-        'median_ms=${times[times.length ~/ 2]} max_ms=${times.last}');
+    print(
+      'PARITY SUMMARY fixtures=${parityFixtures.length} mismatched_actions=${mismatches.length} '
+      'max_diff_png=${maxDiff['png']!.toStringAsFixed(4)} max_diff_jpg=${maxDiff['jpg']!.toStringAsFixed(4)} '
+      'median_ms=${times[times.length ~/ 2]} max_ms=${times.last}',
+    );
     await classifier.close();
 
     expect(mismatches, isEmpty);
