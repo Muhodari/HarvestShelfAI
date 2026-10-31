@@ -201,20 +201,6 @@ This section compares the finished project with the approved proposal. Requireme
 | **Release-ready APK** | Install a trustworthy, updatable build on study phones | **Partial**: the release build is still signed with the debug key | `signingConfig = signingConfigs.getByName("debug")` in [`build.gradle.kts`](app/android/app/build.gradle.kts) |
 | **English and Kinyarwanda** | Sellers can use the app in their own language | **Partial**: both languages built in; Kinyarwanda not yet checked by a native speaker | [`app_text.dart`](app/lib/l10n/app_text.dart); language switch on the Welcome screen |
 
-### Scope changes and why
-
-| Change | Type | Reason |
-|---|---|---|
-| First field photos from **Kimironko market (Kigali)** | Change | Photos were collected in Kimironko rather than in Nyabihu or Rusizi. The field study is still planned in Nyabihu and Rusizi. |
-| **EfficientNetV2-B0** instead of MobileNetV2 as a candidate model | Change | A newer model of similar size gives a fairer modern comparison ([`models.py`](training/src/models.py)). |
-| **Local accounts** with Researcher and Seller roles | Added | Several sellers can share one study phone and each sees only their own history; still offline. |
-| **Training portal** (browser tool) | Added | Lets the research team upload and label field photos and retrain without the command line. |
-| **"Not produce" rejection and mixed-photo handling** | Added | Testing showed bottles and multi-item photos got wrong answers. The model now learns from non-produce images and multi-item scenes, and shows "No vegetable or fruit found" for non-produce. |
-| **Green-banana ripeness scale** | Clarified | Yellow bananas are already ripening for a seller of green cooking bananas, so yellow is Sell Soon, not Fresh. |
-| **iOS build** | Added | For testing on the iOS simulator. Android remains the target platform. |
-| **Wireframes instead of Figma mockups** | Change | The proposal's low-fidelity wireframes were detailed enough to build from; time went into testing the real screens on several sizes instead (see [Testing](#9-testing-validation-and-performance)). |
-| **Tomato Discount Today** answers | Limited | No public dataset has examples of it. It must come from field photos. |
-
 ## 7. Architecture
 
 Both halves of the project are split into small modules, each with one job. Dependencies point inwards (screens → services → data → models), and every service gets what it needs through its constructor, so it can be tested on its own.
