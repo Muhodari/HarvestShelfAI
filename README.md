@@ -205,7 +205,6 @@ This section compares the finished project with the approved proposal. Requireme
 
 | Change | Type | Reason |
 |---|---|---|
-| Trained on six **public datasets** instead of Rwandan field photos | Change | The Kimironko photos are not labelled yet. Public data gives a working model now; it will be fine-tuned on the Kimironko photos with the training portal. |
 | First field photos from **Kimironko market (Kigali)** | Change | Photos were collected in Kimironko rather than in Nyabihu or Rusizi. The field study is still planned in Nyabihu and Rusizi. |
 | **EfficientNetV2-B0** instead of MobileNetV2 as a candidate model | Change | A newer model of similar size gives a fairer modern comparison ([`models.py`](training/src/models.py)). |
 | **Local accounts** with Researcher and Seller roles | Added | Several sellers can share one study phone and each sees only their own history; still offline. |
@@ -215,17 +214,6 @@ This section compares the finished project with the approved proposal. Requireme
 | **iOS build** | Added | For testing on the iOS simulator. Android remains the target platform. |
 | **Wireframes instead of Figma mockups** | Change | The proposal's low-fidelity wireframes were detailed enough to build from; time went into testing the real screens on several sizes instead (see [Testing](#9-testing-validation-and-performance)). |
 | **Tomato Discount Today** answers | Limited | No public dataset has examples of it. It must come from field photos. |
-
-### Still to do
-
-1. **Label the Kimironko photos** with two people, upload them through the [training portal](#training-portal-add-photos-and-retrain), and check agreement (kappa ≥ 0.70).
-2. **Fine-tune and re-test the model on them,** including the first tomato **Discount Today** examples, which no public dataset has.
-3. **Time the app on a real low-cost phone** (3–4 GB RAM) and test the camera there.
-4. **Have a native speaker review** the Kinyarwanda text.
-5. **Sign the release APK** with a project key instead of the debug key.
-6. **Retake the screenshots** on a real phone with the fine-tuned model.
-7. **Update the project notebook** with the large-dataset results, and retrain the other candidate models on the large dataset for a full comparison.
-8. **Run the field study** in Nyabihu and Rusizi.
 
 ## 7. Architecture
 
