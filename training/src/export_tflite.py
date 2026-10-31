@@ -13,7 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 import numpy as np
@@ -138,7 +138,7 @@ def run(cfg: Config, run_dir: Path | None, demo: bool, notice: str | None = None
         "notice": notice,
         "quantization": quant,
         "quality": cfg["quality"],
-        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "val_action_macro_f1": None if val is None else val.get("action_macro_f1"),
         "val_spoilage_recall": None if val is None else val.get("spoilage_recall"),
     }

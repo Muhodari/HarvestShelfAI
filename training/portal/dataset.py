@@ -8,7 +8,7 @@ import io
 import re
 import threading
 from dataclasses import dataclass
-from datetime import date as Date
+import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -50,7 +50,7 @@ class PhotoFields:
             if not _SLUG.match(getattr(self, name)):
                 raise UploadError(f"{name} must be lowercase letters, digits, '-' or '_' (e.g. kamembe)")
         try:
-            Date.fromisoformat(self.date)
+            datetime.date.fromisoformat(self.date)
         except ValueError:
             raise UploadError("date must be YYYY-MM-DD") from None
 
@@ -102,7 +102,7 @@ def add_photos(cfg: Config, files: list[tuple[str, bytes]], fields: PhotoFields)
         raw = cfg.path_of("raw_dir") / folder
         raw.mkdir(parents=True, exist_ok=True)
         rows = []
-        for image_id, ext, (_, data) in zip(ids, exts, files):
+        for image_id, ext, (_, data) in zip(ids, exts, files, strict=True):
             (raw / f"{image_id}{ext}").write_bytes(data)
             rows.append({
                 "image_id": image_id, "file": f"{folder}/{image_id}{ext}", "market": fields.market,
@@ -157,7 +157,7 @@ def effective_label(row: pd.Series) -> str:
 def summary(cfg: Config) -> dict:
     df = read_metadata(cfg)
     labels = [*cfg["categories"], UNUSABLE]
-    counts = {c: {l: 0 for l in labels} for c in [*cfg["crops"], "other"]}
+    counts = {c: dict.fromkeys(labels, 0) for c in [*cfg["crops"], "other"]}
     disagreements = 0
     for _, row in df.iterrows():
         label = effective_label(row)

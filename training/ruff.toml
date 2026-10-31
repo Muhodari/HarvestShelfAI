@@ -1,0 +1,13 @@
+# Lint settings for the training code: `ruff check .` from training/.
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv", "sandbox", "notebooks"]
+
+[lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "N", "C4"]
+ignore = [
+  "E741",   # `l` for a Label is clear in context
+  "N803", "N806",  # `X`, `X_train`: the usual name for a feature matrix
+  "C408",   # dict(key=value) reads better for metadata rows
+  "SIM108", # explicit if/else kept where it mirrors the Dart code
+]

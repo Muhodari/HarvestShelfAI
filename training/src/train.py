@@ -28,7 +28,7 @@ from .models import ARCHITECTURES, build, save_run_model
 def class_weights(y: np.ndarray, cfg: Config) -> dict[int, float]:
     n = len(cfg.labels)
     present = np.unique(y)
-    w = dict(zip(present.tolist(), compute_class_weight("balanced", classes=present, y=y).tolist()))
+    w = dict(zip(present.tolist(), compute_class_weight("balanced", classes=present, y=y).tolist(), strict=True))
     boost = cfg["train"]["spoilage_weight_boost"]
     for l in cfg.labels:
         if l.category == "spoilage_risk" and l.index in w:

@@ -168,9 +168,10 @@ def create_app(cfg: Config | None = None) -> Flask:
                 cmd += ["--finetune-epochs", str(settings["finetune_epochs"])]
             if settings["strict_kappa"]:
                 cmd.append("--strict-kappa")
-            log = open(job.dir / "log.txt", "w")
-            p = subprocess.Popen(cmd, cwd=TRAINING_DIR, stdout=log, stderr=subprocess.STDOUT,
-                                 start_new_session=True)
+            # The child gets its own copy of the file handle, so ours can close right away.
+            with open(job.dir / "log.txt", "w") as log:
+                p = subprocess.Popen(cmd, cwd=TRAINING_DIR, stdout=log, stderr=subprocess.STDOUT,
+                                     start_new_session=True)
             job.update(pid=p.pid)
         return jsonify(name=name)
 

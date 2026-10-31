@@ -16,7 +16,8 @@ discount_today, black / rotten -> spoilage_risk.
                                    banana Fresh(yellow)/Semi(spotted)/Rotten -> sell_soon/discount_today/spoilage_risk
                                    other crops -> unusable
   Banana Ripeness (Roboflow)       unripe/ripe/overripe/rotten -> fresh/sell_soon/discount_today/spoilage_risk
-  Fresh and Stale (Kaggle)         tomato fresh/stale -> fresh/spoilage_risk, banana fresh/stale -> sell_soon/spoilage_risk,
+  Fresh and Stale (Kaggle)         tomato fresh/stale -> fresh/spoilage_risk,
+                                   banana fresh/stale -> sell_soon/spoilage_risk,
                                    other crops -> unusable
   Healthy vs Rotten (Kaggle)       tomato healthy/rotten -> fresh/spoilage_risk, banana rotten -> spoilage_risk,
                                    other crops -> unusable

@@ -12,7 +12,6 @@ import argparse
 import hashlib
 import json
 import sys
-from pathlib import Path
 
 import pandas as pd
 from PIL import Image
@@ -21,7 +20,8 @@ from sklearn.metrics import cohen_kappa_score
 from .config import UNUSABLE, Config, class_id
 from .quality import assess, load_rgb
 
-REQUIRED = ["image_id", "file", "market", "date", "crop", "phone_model", "label_a", "label_b", "final_label", "batch_id"]
+REQUIRED = ["image_id", "file", "market", "date", "crop", "phone_model",
+            "label_a", "label_b", "final_label", "batch_id"]
 
 
 def validate(df: pd.DataFrame, cfg: Config) -> None:

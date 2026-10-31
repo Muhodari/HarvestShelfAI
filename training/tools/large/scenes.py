@@ -76,7 +76,8 @@ class SceneGenerator:
         rng, size = self.rng, self.SIZE
         if rng.random() < 0.35 and self.objects:  # blurred real scene
             with Image.open(rng.choice(self.objects)) as im:
-                return ImageOps.fit(im.convert("RGB"), (size, size)).filter(ImageFilter.GaussianBlur(rng.uniform(4, 12)))
+                blur = ImageFilter.GaussianBlur(rng.uniform(4, 12))
+                return ImageOps.fit(im.convert("RGB"), (size, size)).filter(blur)
         base = np.array(rng.choice(BACKGROUND_COLOURS), dtype=np.float32)
         noise = np.random.default_rng(rng.randrange(1 << 30)).normal(0, rng.uniform(3, 14), (size, size, 1))
         return Image.fromarray(np.clip(base + noise, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1))
@@ -106,7 +107,7 @@ class SceneGenerator:
         slots = [(c, r) for r in range(rows) for c in range(cols)]
         rng.shuffle(slots)
         x0, y0 = (size - cols * cell) // 2, (size - rows * cell) // 2
-        for f, (c, r) in zip(files, slots):
+        for f, (c, r) in zip(files, slots[:len(files)], strict=True):
             side = int(cell * rng.uniform(0.85, 1.05))
             patch, mask = self._patch(f, side)
             x = x0 + c * cell + (cell - side) // 2 + rng.randint(-cell // 10, cell // 10)

@@ -15,7 +15,7 @@ import shutil
 
 import yaml
 
-from src import classical, clean, compare, evaluate, export_tflite, split, thresholds, train
+from src import classical, clean, evaluate, export_tflite, split, thresholds, train
 from src.config import DEFAULT_CONFIG, TRAINING_DIR, Config
 from src.models import ARCHITECTURES
 
@@ -86,7 +86,8 @@ def main() -> None:
     (ROOT / "summary.json").write_text(json.dumps(summary, indent=2))
     print("\n=== SYNTHETIC SUMMARY (test split; synthetic images, not produce) ===")
     for k, v in summary.items():
-        print(f"{k:20s} " + "  ".join(f"{kk}={vv:.3f}" if isinstance(vv, float) else f"{kk}={vv}" for kk, vv in v.items()))
+        cells = (f"{kk}={vv:.3f}" if isinstance(vv, float) else f"{kk}={vv}" for kk, vv in v.items())
+        print(f"{k:20s} " + "  ".join(cells))
 
 
 if __name__ == "__main__":

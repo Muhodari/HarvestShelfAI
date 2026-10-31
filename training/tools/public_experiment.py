@@ -156,7 +156,8 @@ def main() -> None:
         arch = run_dir.name.removeprefix("agrifreshnet_")
         if arch in results or not (run_dir / "test_metrics.json").exists() or not (run_dir / "export.json").exists():
             continue
-        m, e = json.loads((run_dir / "test_metrics.json").read_text()), json.loads((run_dir / "export.json").read_text())
+        m = json.loads((run_dir / "test_metrics.json").read_text())
+        e = json.loads((run_dir / "export.json").read_text())
         results[arch] = {"run": str(run_dir), **{k: m.get(k) for k in
                          ["action_macro_f1", "spoilage_recall", "uncertain_rate", "answered_macro_f1",
                           "unusable_rejected_rate", "class_macro_f1"]},

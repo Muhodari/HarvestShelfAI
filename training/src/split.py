@@ -31,7 +31,8 @@ def _take_fold(df: pd.DataFrame, frac: float, group_col: str, seed: int) -> tupl
     return df.index[rest], df.index[held]
 
 
-def grouped_split(df: pd.DataFrame, test_frac: float, val_frac: float, n_folds: int, group_col: str, seed: int) -> pd.DataFrame:
+def grouped_split(df: pd.DataFrame, test_frac: float, val_frac: float, n_folds: int, group_col: str,
+                  seed: int) -> pd.DataFrame:
     df = df.copy()
     rest_idx, test_idx = _take_fold(df, test_frac, group_col, seed)
     rest = df.loc[rest_idx]

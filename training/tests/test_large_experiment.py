@@ -52,11 +52,17 @@ def test_threshold_search_refuses_to_answer_for_non_crops():
     unusable = len(labels) - 1
     # Usable photos are confident; non-crop photos look like weak tomato spoilage.
     probs, y = [], []
+    def photo(top: int, p_top: float, base: float, extra: dict[int, float] | None = None) -> np.ndarray:
+        p = np.full(len(labels), base)
+        p[top] = p_top
+        for i, v in (extra or {}).items():
+            p[i] = v
+        return p / p.sum()
+
     for _ in range(50):
-        p = np.full(len(labels), 0.01); p[0] = 0.92; probs.append(p / p.sum()); y.append(0)        # tomato fresh
-        p = np.full(len(labels), 0.01); p[3] = 0.92; probs.append(p / p.sum()); y.append(3)        # tomato spoilage
-        p = np.full(len(labels), 0.05); p[3] = 0.40; p[unusable] = 0.30
-        probs.append(p / p.sum()); y.append(unusable)
+        probs += [photo(0, 0.92, 0.01), photo(3, 0.92, 0.01),             # tomato fresh, tomato spoilage
+                  photo(3, 0.40, 0.05, {unusable: 0.30})]                 # non-crop: weak tomato spoilage
+        y += [0, 3, unusable]
     y, probs = np.array(y), np.array(probs)
     assert summarize(y, probs, labels, 0.4, 0.2)["unusable_rejected_rate"] == 0  # a loose t_spoil answers them
     best = search(y, probs, labels, 0.85, 0.15, min_rejection=0.95, min_t_conf=0.4)

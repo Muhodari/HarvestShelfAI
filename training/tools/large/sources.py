@@ -194,7 +194,8 @@ class Imagenette(DatasetSource):
     def _photos(self) -> list[Photo]:
         out = []
         for synset in sorted(d for d in self.root.glob("*/train/*") if d.is_dir()):
-            out += [self._photo(f, "other", UNUSABLE, g, OBJECT) for f, g in in_blocks(images_in(synset), synset.name, 30)]
+            blocks = in_blocks(images_in(synset), synset.name, 30)
+            out += [self._photo(f, "other", UNUSABLE, g, OBJECT) for f, g in blocks]
         return out
 
 
