@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../l10n/app_text.dart';
 
-/// The HarvestShelf app icon (scripts/make_logo.py).
+/// The HarvestShelf app icon.
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key, this.size = 96});
 

@@ -113,7 +113,7 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-# App icon, drawn by scripts/make_logo.py. Regenerate with:
+# App icon. Regenerate with:
 #   dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true

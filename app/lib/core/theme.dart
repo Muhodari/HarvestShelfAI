@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 
-/// Brand palette, shared with the logo (scripts/make_logo.py).
+/// Brand palette, shared with the app icon.
 ///
 /// The interface is deliberately quiet: white background, soft grey
 /// surfaces without borders, one green accent. Category colours are used
