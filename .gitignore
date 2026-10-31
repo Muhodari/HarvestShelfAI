@@ -28,5 +28,3 @@ training/*.log
 # Local test outputs (third-party photos, not published)
 test_results/
 
-# Demo photos for recording (third-party, not published)
-demo_photos/
