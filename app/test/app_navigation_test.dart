@@ -60,6 +60,11 @@ void main() {
       await tester.enterText(find.byKey(const Key('reg_username')), 'sage');
       await tester.enterText(find.byKey(const Key('reg_pin')), '2580');
       await tester.enterText(find.byKey(const Key('reg_confirm')), '2580');
+      await tester.ensureVisible(find.byKey(const Key('consent_box')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('consent_box')));
+      await tester.ensureVisible(find.byKey(const Key('reg_submit')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('reg_submit')));
       await settle(tester);
       expect(find.textContaining('username "sage"'), findsOneWidget);
@@ -176,7 +181,7 @@ void main() {
       await settle(tester);
       expect(find.text('@aline · Seller'), findsOneWidget);
       expect(find.text('Manage users'), findsNothing);
-      expect(find.text('Export test log (CSV)'), findsNothing);
+      expect(find.text('Export study data (CSV)'), findsNothing);
     },
   );
 
@@ -215,6 +220,36 @@ void main() {
     },
   );
 
+  testWidgets('no account without consent; privacy policy opens', (
+    tester,
+  ) async {
+    await start(tester);
+    await tester.tap(find.text('Set up this phone'));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('reg_name')), 'Aline Uwase');
+    await tester.enterText(find.byKey(const Key('reg_username')), 'aline');
+    await tester.enterText(find.byKey(const Key('reg_pin')), '2580');
+    await tester.enterText(find.byKey(const Key('reg_confirm')), '2580');
+    await tester.ensureVisible(find.byKey(const Key('reg_submit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('reg_submit')));
+    await settle(tester);
+    expect(find.textContaining('Consent is needed'), findsOneWidget);
+    expect(services.session.user, isNull);
+
+    await tester.ensureVisible(find.byKey(const Key('consent_policy')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('consent_policy')));
+    await settle(tester);
+    expect(find.text('Privacy & terms'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('stop at any time'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.textContaining('stop at any time'), findsOneWidget);
+  });
+
   testWidgets('switching to Kinyarwanda changes the text and is remembered', (
     tester,
   ) async {
@@ -237,6 +272,11 @@ void main() {
     await tester.enterText(find.byKey(const Key('reg_username')), 'aline');
     await tester.enterText(find.byKey(const Key('reg_pin')), '2580');
     await tester.enterText(find.byKey(const Key('reg_confirm')), '2580');
+    await tester.ensureVisible(find.byKey(const Key('consent_box')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('consent_box')));
+    await tester.ensureVisible(find.byKey(const Key('reg_submit')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('reg_submit')));
     await settle(tester);
     await tester.pump(const Duration(seconds: 9));

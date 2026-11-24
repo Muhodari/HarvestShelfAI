@@ -47,10 +47,8 @@ class AppText {
   String get appName => 'HarvestShelf';
   String get tagline =>
       _t('Know what to sell first.', 'Menya icyo ugomba kugurisha mbere.');
-  String get disclaimer => _t(
-    'Visible condition only. This is not a food-safety check.',
-    "Iri suzuma rireba uko bigaragara gusa. Ntabwo ari igenzura ry'umutekano w'ibiribwa.",
-  );
+  String get disclaimer =>
+      _t('Visible condition only.', 'Iri suzuma rireba uko bigaragara gusa.');
   String get demoWarning => _t(
     'Demo model: not trained on real produce. Results are not meaningful.',
     "Icyitegererezo cy'igerageza: nticyatojwe ku musaruro nyawo. Ibisubizo ntibyizewe.",
@@ -91,7 +89,7 @@ class AppText {
   String get takePhoto => _t('Take photo', 'Fata ifoto');
   String get chooseFromGallery => _t('Choose from gallery', 'Hitamo mu mafoto');
   String get scanHint => _t(
-    'One tomato or banana hand, filling the frame, in daylight.',
+    'Photograph one tomato or one banana hand. Fill the frame and use daylight.',
     'Inyanya imwe cyangwa igitoki kimwe, cyuzuye ifoto, ku manywa.',
   );
   String get checking => _t('Checking produce…', 'Turimo gusuzuma…');
@@ -151,7 +149,7 @@ class AppText {
   String crop(String? crop) => switch (crop) {
     'tomato' => _t('Tomato', 'Inyanya'),
     'banana' => _t('Green banana', 'Igitoki kibisi'),
-    _ => _t('Unknown', 'Ntibizwi'),
+    _ => _t('Not recognised', 'Ntibizwi'),
   };
 
   String reason(String reasonId) => switch (reasonId) {
@@ -297,7 +295,7 @@ class AppText {
     'Wibagiwe PIN? Saba umushakashatsi kuyihindura.',
   );
   String get pinStored => _t(
-    'Your PIN is stored scrambled (hashed) on this phone only.',
+    'Your PIN is kept secret: it is scrambled and never leaves this phone.',
     "PIN yawe ibikwa mu buryo bw'ibanga kuri iyi telefoni gusa.",
   );
   String accountCreated(String username) => _t(
@@ -363,19 +361,211 @@ class AppText {
     "Ongeramo abacuruzi, hindura PIN n'inshingano",
   );
   String get exportLog =>
-      _t('Export test log (CSV)', "Kuramo raporo y'igerageza (CSV)");
+      _t('Export study data (CSV)', "Kuramo raporo y'igerageza (CSV)");
   String get exportSub => _t(
     'All scans on this phone. No images, names or usernames.',
     'Amasuzuma yose ari kuri iyi telefoni. Nta mafoto, amazina cyangwa amazina yo kwinjira.',
   );
   String get model => _t('Model', 'Icyitegererezo');
-  String modelSub(String version, double tConf, double tSpoil) => _t(
-    '$version · thresholds confidence $tConf, spoilage $tSpoil',
-    '$version · imipaka: icyizere $tConf, kwangirika $tSpoil',
-  );
+  String modelSub(String version, double tConf, double tSpoil) {
+    final conf = '${(tConf * 100).round()}%';
+    final spoil = '${(tSpoil * 100).round()}%';
+    return _t(
+      '$version · answers from $conf confidence, flags spoilage from $spoil',
+      '$version · imipaka: icyizere $conf, kwangirika $spoil',
+    );
+  }
+
   String get myData => _t('My data', 'Amakuru yanjye');
   String get clearHistory => _t('Clear my history', 'Siba amateka yanjye');
   String get about => _t('About', 'Ibyerekeye');
+
+  // ---- privacy policy, terms and consent ------------------------------------
+  String get privacyTitle => _t('Privacy & terms', "Ibanga n'amabwiriza");
+  String get privacySub => _t(
+    'What the app stores and your rights',
+    "Ibyo porogaramu ibika n'uburenganzira bwawe",
+  );
+  String get privacyIntro => _t(
+    'HarvestShelf helps market sellers check whether fruit and vegetables are '
+        'still fresh. It is part of a student research project at the African '
+        'Leadership University.\n\n'
+        'This page explains, in plain words, what information the app keeps, '
+        'who can see it, and what you agree to when you use it. Please read it '
+        'before you create an account.',
+    "HarvestShelf ifasha abacuruzi bo ku isoko kumenya niba imbuto n'imboga "
+        "bikiri bishya. Ni igice cy'umushinga w'ubushakashatsi bw'umunyeshuri "
+        "muri African Leadership University.\n\n"
+        "Uru rupapuro rusobanura, mu magambo yoroshye, amakuru porogaramu ibika, "
+        "abashobora kuyabona, n'ibyo wemera iyo uyikoresheje. Turagusaba "
+        "kurusoma mbere yo gufungura konti.",
+  );
+
+  /// Privacy policy and end-user terms, as (heading, body) pairs.
+  List<(String, String)> get privacySections => [
+    (
+      _t('1. What the app keeps', '1. Ibyo porogaramu ibika'),
+      _t(
+        'About you: your name, your username, your PIN, your role (seller or '
+            'researcher), the date your account was made, the last time you '
+            'logged in, and the language you chose. Your PIN is scrambled so '
+            'nobody can read it, not even the researcher.\n\n'
+            'For each scan: a small copy of the photo, the type of produce, the '
+            'result, how sure the app was, the date and time, how long the check '
+            'took and the version of the app\'s checker.\n\n'
+            'The app does not collect your phone number, location, contacts or '
+            'photos of your face.',
+        "Ibikwerekeye: amazina yawe, izina ryo kwinjira, PIN yawe, uruhare rwawe "
+            "(umucuruzi cyangwa umushakashatsi), itariki konti yafunguriweho, "
+            "igihe uheruka kwinjira, n'ururimi wahisemo. PIN yawe ibikwa mu "
+            "ibanga ku buryo ntawe ushobora kuyisoma, ndetse n'umushakashatsi.\n\n"
+            "Kuri buri suzuma: kopi nto y'ifoto, ubwoko bw'umusaruro, igisubizo, "
+            "uko porogaramu yizeye igisubizo, itariki n'isaha, igihe isuzuma "
+            "ryatwaye na verisiyo y'igenzura rya porogaramu.\n\n"
+            "Porogaramu ntibika nimero ya telefoni yawe, aho uri, abo muvugana "
+            "cyangwa amafoto y'isura yawe.",
+      ),
+    ),
+    (
+      _t('2. Camera and photos', '2. Kamera n\'amafoto'),
+      _t(
+        'The app uses the camera only when you take a scan, and the gallery '
+            'only when you choose a photo from it. It keeps a small, cropped '
+            'copy of the produce photo so you can see it in your history. It '
+            'does not keep the full-size photo and does not look at your other '
+            'photos.',
+        "Porogaramu ikoresha kamera gusa iyo usuzuma, n'ububiko bw'amafoto "
+            "gusa iyo uhisemo ifoto muri bwo. Ibika kopi nto y'ifoto "
+            "y'umusaruro kugira ngo uyibone mu mateka yawe. Ntibika ifoto nini "
+            "y'umwimerere kandi ntireba andi mafoto yawe.",
+      ),
+    ),
+    (
+      _t('3. Where it is kept', '3. Aho bibikwa'),
+      _t(
+        'Everything is kept on this phone. The app does not use the internet '
+            'and never sends your information anywhere by itself.',
+        "Byose bibikwa kuri iyi telefoni. Porogaramu ntikoresha interineti "
+            "kandi ntiyohereza amakuru yawe ahandi ubwayo.",
+      ),
+    ),
+    (
+      _t('4. Who can see it', '4. Abashobora kubibona'),
+      _t(
+        'Sellers: you see only your own scans and photos.\n\n'
+            'The researcher can see the list of accounts on this phone (names, '
+            'usernames, roles and how many scans each person has made). The '
+            'researcher can also reset a forgotten PIN, change an account\'s '
+            'role, or delete an account. The researcher cannot see your PIN.',
+        "Abacuruzi: ubona amasuzuma yawe n'amafoto yawe gusa.\n\n"
+            "Umushakashatsi ashobora kubona urutonde rwa konti ziri kuri iyi "
+            "telefoni (amazina, amazina yo kwinjira, uruhare n'umubare "
+            "w'amasuzuma buri wese yakoze). Umushakashatsi ashobora kandi "
+            "guhindura PIN yibagiranye, guhindura uruhare rwa konti, cyangwa "
+            "gusiba konti. Umushakashatsi ntashobora kubona PIN yawe.",
+      ),
+    ),
+    (
+      _t('5. Study results', '5. Ibisubizo by\'ubushakashatsi'),
+      _t(
+        'For the study, the researcher can save a results file on the phone and '
+            'copy it to a computer with a cable. This file has no names, '
+            'usernames or photos. Each person is shown only as an account '
+            'number. It lists, for each scan, the date and time, the type of '
+            'produce, the result, how sure the app was and how long the check '
+            'took. It is used only to measure how well the app works.',
+        "Ku bw'ubushakashatsi, umushakashatsi ashobora kubika dosiye "
+            "y'ibisubizo kuri telefoni akayimurira kuri mudasobwa akoresheje "
+            "umugozi. Iyo dosiye nta mazina, amazina yo kwinjira cyangwa amafoto "
+            "ifite. Buri muntu agaragazwa na nimero ya konti gusa. Igaragaza, "
+            "kuri buri suzuma, itariki n'isaha, ubwoko bw'umusaruro, igisubizo, "
+            "uko porogaramu yizeye n'igihe isuzuma ryatwaye. Ikoreshwa gusa mu "
+            "gupima uko porogaramu ikora neza.",
+      ),
+    ),
+    (
+      _t('6. Keeping your account safe', '6. Kurinda konti yawe'),
+      _t(
+        'Your account is protected by your PIN. After 5 wrong PINs in a row, '
+            'the account is locked for 30 seconds. Do not share your PIN. If '
+            'other people use this phone, log out when you finish.',
+        "Konti yawe irindwa na PIN yawe. Nyuma yo kwandika PIN nabi inshuro 5 "
+            "zikurikiranye, konti ifungwa amasegonda 30. Ntugasangize abandi PIN "
+            "yawe. Niba abandi bantu bakoresha iyi telefoni, sohoka urangije.",
+      ),
+    ),
+    (
+      _t('7. How long it is kept', '7. Igihe bibikwa'),
+      _t(
+        'Your information stays on this phone until you clear your history, '
+            'the researcher deletes your account, or the app is removed from '
+            'the phone.',
+        "Amakuru yawe aguma kuri iyi telefoni kugeza usibye amateka yawe, "
+            "umushakashatsi asibye konti yawe, cyangwa porogaramu ikuwe kuri "
+            "telefoni.",
+      ),
+    ),
+    (
+      _t('8. Your rights', '8. Uburenganzira bwawe'),
+      _t(
+        'Using the app is your choice and you are not paid for it. You can '
+            'stop at any time, with no penalty.\n\n'
+            'You can change your name and PIN in Profile. To delete all your '
+            'scans and photos, go to Profile > Clear my history. To delete your '
+            'whole account, ask the researcher.',
+        "Gukoresha porogaramu ni amahitamo yawe kandi nta gihembo utangwa. "
+            "Ushobora guhagarara igihe cyose, nta ngaruka.\n\n"
+            "Ushobora guhindura izina ryawe na PIN muri Umwirondoro. Gusiba "
+            "amasuzuma yawe yose n'amafoto, jya kuri Umwirondoro > Siba amateka "
+            "yanjye. Gusiba konti yawe yose, saba umushakashatsi.",
+      ),
+    ),
+    (
+      _t('9. What a result means', '9. Icyo igisubizo bivuze'),
+      _t(
+        'The app only looks at how the produce appears in the photo. Its result '
+            'is advice. You always decide what to sell. '
+            'If the app is not sure, it shows Uncertain.',
+        "Porogaramu ireba gusa uko umusaruro ugaragara ku ifoto. Igisubizo "
+            "cyayo ni inama. Ni wowe "
+            "uhora ufata icyemezo cy'ibyo ugurisha. Iyo porogaramu itizeye, "
+            "yerekana Ntibizwi.",
+      ),
+    ),
+    (
+      _t('10. Using the app', '10. Gukoresha porogaramu'),
+      _t(
+        'You may use this app for free. Please do not sell it or remove these '
+            'terms. The app is offered as it is, with no guarantee that every '
+            'result is correct.',
+        "Ushobora gukoresha iyi porogaramu ku buntu. Turagusaba kutayigurisha "
+            "cyangwa gukuraho aya mabwiriza. Porogaramu itangwa uko iri, nta "
+            "cyizere ko buri gisubizo ari ukuri.",
+      ),
+    ),
+    (
+      _t('11. Questions', '11. Ibibazo'),
+      _t(
+        'If you have a question or a concern, please speak to the researcher.',
+        'Niba ufite ikibazo cyangwa impungenge, vugana n\'umushakashatsi.',
+      ),
+    ),
+  ];
+
+  String get consentAgree => _t(
+    'I have read (or heard) the privacy policy and agree to take part.',
+    "Nasomye (cyangwa numvise) amabwiriza y'ibanga kandi nemeye kwitabira.",
+  );
+  String get consentAgreeForOther => _t(
+    'The participant heard the consent read aloud and agreed to take part.',
+    "Uwitabira yumvise amasezerano asomwe kandi yemeye kwitabira.",
+  );
+  String get consentRequired => _t(
+    'Consent is needed before an account can be created.',
+    'Kwemera birakenewe mbere yo gufungura konti.',
+  );
+  String get readPolicy =>
+      _t('Read the privacy policy', "Soma amabwiriza y'ibanga");
   String get worksOffline => _t('Works offline.', 'Ikora nta interineti.');
   String get logoutQ => _t('Log out?', 'Urashaka gusohoka?');
   String get logoutBody => _t(

@@ -7,6 +7,7 @@ import '../models/user.dart';
 import '../services/auth/auth_service.dart';
 import '../services/auth/session.dart';
 import '../widgets/common.dart';
+import 'privacy_screen.dart';
 
 /// Researcher-only: list, add, change role, reset PIN, delete.
 class ManageUsersScreen extends StatefulWidget {
@@ -364,7 +365,14 @@ class _AddUserSheetState extends State<_AddUserSheet> {
               selected: {_role},
               onSelectionChanged: (s) => setState(() => _role = s.first),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            ConsentField(
+              label: t.consentAgreeForOther,
+              requiredMessage: t.consentRequired,
+              linkLabel: t.readPolicy,
+              onOpenPolicy: () => PrivacyScreen.open(context),
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: () {
                 if (_form.currentState!.validate()) {

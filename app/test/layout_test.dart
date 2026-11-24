@@ -78,6 +78,11 @@ void main() {
         scrollable: find.byType(Scrollable).last,
       );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('consent_box')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('consent_box')));
+      await tester.ensureVisible(find.byKey(const Key('reg_submit')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('reg_submit')));
       await settle(tester);
       await tester.pump(const Duration(seconds: 9));

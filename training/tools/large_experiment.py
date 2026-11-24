@@ -21,6 +21,11 @@ discount_today, black / rotten -> spoilage_risk.
                                    other crops -> unusable
   Healthy vs Rotten (Kaggle)       tomato healthy/rotten -> fresh/spoilage_risk, banana rotten -> spoilage_risk,
                                    other crops -> unusable
+  Tomato Quality Grading (Kaggle, CC BY 4.0)  originals only: Fresh/Rotten -> fresh/spoilage_risk
+  Tomato Detection (Mendeley, CC BY 4.0)      Fresh/Rotten -> fresh/spoilage_risk, one copy per original
+  Banana Day 0-7 (Mendeley, CC BY 4.0)        day 0-1/3-4/7 -> sell_soon/discount_today/spoilage_risk
+  BananaImageBD (Mendeley, CC BY 4.0)         Green/Semi-ripe/Ripe -> fresh/sell_soon/sell_soon (Overripe unused)
+  Annotated Banana (Mendeley, CC BY 4.0)      unripe/ripe/overripe -> fresh/sell_soon/discount_today
   Garbage classification (Kaggle)  bottles, cans, paper, ... -> unusable (non-produce)
   Imagenette (fast.ai)             everyday scenes and objects -> unusable (non-produce)
 
@@ -53,6 +58,7 @@ from tools.large.sources import OBJECT, PRODUCE, TARGET, default_sources
 
 ROOT = TRAINING_DIR / "sandbox" / "large"
 NOTICE = ("Trained on public datasets (AgriFreshNET, Banana Ripeness, Fresh and Stale, Healthy vs Rotten, "
+          "Tomato Quality Grading, Tomato Detection, Banana Day 0-7, BananaImageBD, Annotated Banana Ripeness, "
           "Garbage, Imagenette), not yet on Rwandan market photos.")
 
 CAP_PER_CLASS_SOURCE = 2500   # per (source, class), keeps one source from dominating

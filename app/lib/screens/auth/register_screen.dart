@@ -4,6 +4,7 @@ import '../../l10n/app_text.dart';
 import '../../services/auth/auth_service.dart';
 import '../../services/auth/session.dart';
 import '../../widgets/common.dart';
+import '../privacy_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -104,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ? null
                     : t.authError(AuthService.validateName(v ?? '')!)),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               TextFormField(
                 key: const Key('reg_username'),
                 controller: _username,
@@ -120,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ? null
                     : t.authError(AuthService.validateUsername(v ?? '')!)),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               PinField(
                 fieldKey: const Key('reg_pin'),
                 controller: _pin,
@@ -129,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ? null
                     : t.authError(AuthService.validatePin(v ?? '')!)),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               PinField(
                 fieldKey: const Key('reg_confirm'),
                 controller: _confirm,
@@ -138,6 +139,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onSubmitted: (_) => _submit(),
                 validator: (v) =>
                     v != _pin.text ? t.authError(AuthError.pinMismatch) : null,
+              ),
+              const SizedBox(height: 16),
+              ConsentField(
+                label: t.consentAgree,
+                requiredMessage: t.consentRequired,
+                linkLabel: t.readPolicy,
+                onOpenPolicy: () => PrivacyScreen.open(context),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 16),

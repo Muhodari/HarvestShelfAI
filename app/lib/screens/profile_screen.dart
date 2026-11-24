@@ -10,6 +10,7 @@ import '../services/export_service.dart';
 import '../widgets/common.dart';
 import 'change_pin_screen.dart';
 import 'manage_users_screen.dart';
+import 'privacy_screen.dart';
 
 /// Account, research tools (researchers), data and about.
 class ProfileScreen extends StatelessWidget {
@@ -131,6 +132,12 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.info_outline_rounded,
                 title: t.appName,
                 subtitle: '${t.worksOffline} ${t.disclaimer}',
+              ),
+              _Item(
+                icon: Icons.privacy_tip_outlined,
+                title: t.privacyTitle,
+                subtitle: t.privacySub,
+                onTap: () => PrivacyScreen.open(context),
               ),
             ],
           ),
